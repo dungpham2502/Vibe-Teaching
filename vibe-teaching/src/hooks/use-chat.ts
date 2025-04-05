@@ -37,8 +37,7 @@ export function useChat({
 			}
 
 			const data = await response.json();
-			console.log(data.xmlContent);
-			// console.log(data.content);
+			console.log(data.jsonContent);
 			return (
 				data.content ||
 				"I'm sorry, I couldn't process your request at the moment."

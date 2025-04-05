@@ -32,14 +32,14 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 	return (
 		<Series>
 			{scenes.map((scene: Scene) => (
-				<Series.Sequence key={scene.class} durationInFrames={scene.durationInFrames}>
+				<Series.Sequence key={scene.id || `scene-${scene.desc}-${Math.random()}`} durationInFrames={scene.durationInFrames}>
 					<AbsoluteFill className={cn("flex flex-col items-center justify-center p-20", scene.class)}>
 						{scene.children.map((item: RemotionObject) => {
 							switch (item.type) {
 								case "title":
 									return (
 										<h1 
-											key={item.class} 
+											key={item.id || `title-${Math.random()}`} 
 											className={cn(
 												"text-9xl font-bold mb-8 text-center", 
 												item.class
@@ -51,7 +51,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 								case "subtitle":
 									return (
 										<h2 
-											key={item.class} 
+											key={item.id || `subtitle-${Math.random()}`} 
 											className={cn(
 												"text-6xl font-semibold my-4 text-center", 
 												item.class
@@ -63,7 +63,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 								case "heading":
 									return (
 										<h3 
-											key={item.class} 
+											key={item.id || `heading-${Math.random()}`} 
 											className={cn(
 												"text-7xl font-medium my-6 text-center", 
 												item.class
@@ -75,7 +75,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 								case "paragraph":
 									return (
 										<p 
-											key={item.class} 
+											key={item.id || `paragraph-${Math.random()}`} 
 											className={cn(
 												"text-4xl my-4 text-center max-w-4xl",
 												item.class
@@ -87,7 +87,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 								case "image":
 									return (
 										<div 
-											key={item.class} 
+											key={item.id || `image-${Math.random()}`} 
 											className={cn(
 												"my-6 flex justify-center items-center",
 												item.class
@@ -101,7 +101,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 										</div>
 									);
 								default:
-									return <div key={item.id || item.class}>Item not supported</div>;
+									return <div key={item.id || `item-${Math.random()}`}>Item not supported</div>;
 							}
 						})}
 					</AbsoluteFill>

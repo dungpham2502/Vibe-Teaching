@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { systemPrompt, userPrompt } from "@/utils/groq/prompts";
+import { convertJsonToRemotionTypes } from "@/lib/json-parser";
+import { convertXML } from "simple-xml-to-json";
+import { Scene } from "@/types/remotion-types";
 
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY!,
@@ -12,15 +15,64 @@ const groq = new Groq({
  * @returns The extracted XML content or null if not found
  */
 function extractXmlContent(text: string): string | null {
-	// Look for content between XML/code tags
+	// Look for content between triple backticks with or without 'xml' marker
 	const xmlRegex = /```(?:xml)?\s*(<content>[\s\S]*?<\/content>)\s*```/;
 	const match = text.match(xmlRegex);
-
+	
 	if (match && match[1]) {
+		// Return only the XML content without the backticks and language marker
 		return match[1];
 	}
-
+	
+	// If not found with backticks, try direct XML detection
+	const directXmlRegex = /(<content>[\s\S]*?<\/content>)/;
+	const directMatch = text.match(directXmlRegex);
+	
+	if (directMatch && directMatch[1]) {
+		return directMatch[1];
+	}
+	
 	return null;
+}
+
+/**
+ * Converts XML content to a Remotion-compatible JSON structure
+ * with unique keys for each element
+ * @param xmlContent The XML content to convert
+ * @returns The converted JSON or null if conversion failed
+ */
+function convertXmlToJson(xmlContent: string | null): Scene[] | null {
+	if (!xmlContent) return null;
+	
+	try {
+		// Convert XML to intermediate JSON format
+		const intermediateJson = convertXML(xmlContent);
+		
+		// Convert intermediate JSON to Remotion types
+		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
+		
+		// Add unique keys to each scene and its children
+		return remotionJson.map((scene, sceneIndex) => {
+			// Add unique key to scene
+			const sceneWithKey = {
+				...scene,
+				id: `scene-${sceneIndex}`,
+			};
+			
+			// Add unique keys to children
+			if (sceneWithKey.children && sceneWithKey.children.length > 0) {
+				sceneWithKey.children = sceneWithKey.children.map((child, childIndex) => ({
+					...child,
+					id: `${sceneWithKey.id}-child-${childIndex}`,
+				}));
+			}
+			
+			return sceneWithKey;
+		});
+	} catch (error) {
+		console.error("Error converting XML to JSON:", error);
+		return null;
+	}
 }
 
 export async function POST(request: Request) {
@@ -43,12 +95,16 @@ export async function POST(request: Request) {
 
 		// Extract XML content if present
 		const xmlContent = extractXmlContent(responseContent);
+		
+		// Convert XML to JSON if XML content is found
+		const jsonContent = convertXmlToJson(xmlContent);
 
-		// Return both the full response and the extracted XML
+		// Return the full response, extracted XML, and the converted JSON
 		return NextResponse.json(
 			{
 				content: responseContent,
 				xmlContent,
+				jsonContent,
 			},
 			{ status: 200 }
 		);

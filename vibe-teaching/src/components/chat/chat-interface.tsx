@@ -17,32 +17,67 @@ interface ChatInterfaceProps {
 
 // Component to format message content, replacing XML with video icon
 const FormattedMessage = ({ content }: { content: string }) => {
-  // Function to check if the content contains XML
-  const hasXmlContent = content.includes("<content>") && content.includes("</content>");
+  // Check for XML in code blocks with ```xml tags
+  const codeBlockRegex = /```(?:xml)?\s*(<content>[\s\S]*?<\/content>)\s*```/;
+  const codeBlockMatch = content.match(codeBlockRegex);
   
-  if (!hasXmlContent) {
-    // If no XML, just return the content as is
-    return <>{content}</>;
+  // Check for direct XML content without code blocks
+  const directXmlRegex = /(<content>[\s\S]*?<\/content>)/;
+  
+  // If XML is found in code blocks
+  if (codeBlockMatch) {
+    // Split the content into parts
+    const beforeXml = content.substring(0, codeBlockMatch.index);
+    const afterXml = content.substring(codeBlockMatch.index! + codeBlockMatch[0].length);
+    
+    // Clean up the text: remove phrases like "Here is the converted XML code:" or similar
+    const cleanedBeforeXml = beforeXml.replace(/Here is (?:the |a )(?:converted |)XML(?:| code| script)(?::|\.)\s*/gi, "");
+    
+    // Clean up the after text, removing any explanations about the XML
+    const cleanedAfterXml = afterXml.replace(/^I applied the provided guidelines(?:.|\n)*$/m, "").trim();
+    
+    return (
+      <>
+        {cleanedBeforeXml}
+        <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
+          <Video className="w-8 h-8 text-blue-500 mr-3" />
+          <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
+        </div>
+        {cleanedAfterXml && (
+          <div className="mt-2">{cleanedAfterXml}</div>
+        )}
+      </>
+    );
   }
   
-  // Find the XML part to replace
-  const xmlStartIndex = content.indexOf("<content>");
-  const xmlEndIndex = content.lastIndexOf("</content>") + "</content>".length;
+  // If direct XML without backticks is found
+  const directMatch = content.match(directXmlRegex);
+  if (directMatch) {
+    const beforeXml = content.substring(0, directMatch.index);
+    const afterXml = content.substring(directMatch.index! + directMatch[0].length);
+    
+    // Clean up the text: remove phrases like "Here is the converted XML code:" or similar
+    const cleanedBeforeXml = beforeXml.replace(/Here is (?:the |a )(?:converted |)XML(?:| code| script)(?::|\.)\s*/gi, "");
+    
+    // Clean up the after text, removing any explanations about the XML
+    const cleanedAfterXml = afterXml.replace(/^I applied the provided guidelines(?:.|\n)*$/m, "").trim();
+    
+    return (
+      <>
+        {cleanedBeforeXml}
+        <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
+          <Video className="w-8 h-8 text-blue-500 mr-3" />
+          <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
+        </div>
+        {cleanedAfterXml && (
+          <div className="mt-2">{cleanedAfterXml}</div>
+        )}
+      </>
+    );
+  }
   
-  // Split the content into parts
-  const beforeXml = content.substring(0, xmlStartIndex);
-  const afterXml = content.substring(xmlEndIndex);
-  
-  return (
-    <>
-      {beforeXml}
-      <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
-        <Video className="w-8 h-8 text-blue-500 mr-3" />
-        <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
-      </div>
-      {afterXml}
-    </>
-  );
+  // If no XML found, return content as is
+  return <>{content}</>;
 }
 
 export default function ChatInterface({
