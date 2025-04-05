@@ -113,12 +113,23 @@ LAYOUT GUIDELINES FOR 1920x1080:
    - Vertical: 108px top/bottom (10% of 1080px)
 
 Example Structure with 1080p Styling:
+\`\`\`xml
 <content>
   <scene class="w-[1920px] h-[1080px] flex flex-col items-center justify-center px-[192px] py-[108px] bg-gray-50 dark:bg-gray-900" durationInFrames="150" desc="Introduction">
     <title class="max-w-[1536px] text-8xl md:text-9xl font-bold text-center text-blue-600 dark:text-blue-400 animate-fade-in" durationInFrames="150">Main Topic</title>
     <paragraph class="max-w-[1344px] text-3xl md:text-4xl text-center text-gray-700 dark:text-gray-300 leading-relaxed" durationInFrames="150">Brief introduction</paragraph>
   </scene>
 </content>
+\`\`\`
+
+OUTPUT FORMAT:
+Your response should ONLY include the XML code surrounded by triple backticks and xml language identifier, like this:
+
+\`\`\`xml
+<content>
+  <!-- Your generated XML here -->
+</content>
+\`\`\`
 
 Convert the following text into this XML format, applying appropriate Tailwind styles for 1920x1080 resolution:
 
@@ -132,6 +143,7 @@ Remember:
 - Position elements according to layout guidelines
 - Include responsive design considerations
 - Use consistent spacing and alignment
-- Maintain proper visual hierarchy`;
+- Maintain proper visual hierarchy
+- Return ONLY the XML code surrounded by triple backticks`;
 
 export const userPrompt = `User: `;
