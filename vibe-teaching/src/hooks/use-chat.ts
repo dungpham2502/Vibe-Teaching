@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useScenesStore } from "@/store/useScenesStore";
+import { convertJsonToRemotionTypes } from "@/lib/json-parser";
+import { Scene } from "@/types/remotion-types";
+import { v4 as uuidv4 } from "uuid";
 
 export type MessageType = "user" | "system";
 
@@ -21,6 +25,8 @@ export function useChat({
 }: UseChatProps) {
 	const [messages, setMessages] = useState<Message[]>(initialMessages);
 	const [isStreaming, setIsStreaming] = useState(false);
+
+	const { setScenes } = useScenesStore();
 
 	const getAIResponse = async (userMessage: string) => {
 		try {
@@ -50,23 +56,23 @@ export function useChat({
 
 	const streamResponse = async (text: string) => {
 		setIsStreaming(true);
-		
+
 		// Split text into words
 		const words = text.split(" ");
 		let currentContent = "";
-		
+
 		// Determine appropriate chunk size and delay based on content length
 		// For XML content, use larger chunks but keep streaming visible
 		const isLongContent = text.length > 1000;
 		const chunkSize = isLongContent ? 10 : 2;
 		const delay = isLongContent ? 20 : 40;
-		
+
 		try {
 			// Stream the content in chunks
 			for (let i = 0; i < words.length; i += chunkSize) {
 				const chunk = words.slice(i, i + chunkSize).join(" ");
 				currentContent += chunk + " ";
-				
+
 				setMessages((prev) =>
 					prev.map((msg, idx) =>
 						idx === prev.length - 1
@@ -74,7 +80,7 @@ export function useChat({
 							: msg
 					)
 				);
-				
+
 				// Use a proper delay to ensure UI updates
 				await new Promise((resolve) => setTimeout(resolve, delay));
 			}
@@ -84,9 +90,7 @@ export function useChat({
 			// Ensure final content is set and streaming state is properly turned off
 			setMessages((prev) =>
 				prev.map((msg, idx) =>
-					idx === prev.length - 1
-						? { ...msg, content: text.trim() }
-						: msg
+					idx === prev.length - 1 ? { ...msg, content: text.trim() } : msg
 				)
 			);
 			setIsStreaming(false);

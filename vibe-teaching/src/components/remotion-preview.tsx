@@ -2,28 +2,56 @@ import { Player } from "@remotion/player";
 import { RemotionObject, Scene } from "@/types/remotion-types";
 import { AbsoluteFill, Series } from "remotion";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
-export function RemotionPreview({ scenes }: { scenes: Scene[] }) {
-	return (
-		<div className="bg-white w-full">
-			<div className="w-full aspect-video flex flex-col justify-center items-center border-red border-[1px] rounded">
-				<Player
-					fps={30}
-					component={VideoComponent}
-					inputProps={{ scenes }}
-					durationInFrames={240}
-					compositionHeight={1080}
-					compositionWidth={1920}
-					loop
-					style={{
-						width: "100%",
-					}}
-					controls
-					acknowledgeRemotionLicense
-				/>
-			</div>
-		</div>
-	);
+interface RemotionPreviewProps {
+  scenes: Scene[];
+  selectedSceneId?: string | null;
+}
+
+export function RemotionPreview({ scenes, selectedSceneId }: RemotionPreviewProps) {
+  const [currentFrame, setCurrentFrame] = useState(0);
+  
+  // Find the selected scene and its start frame
+  useEffect(() => {
+    if (selectedSceneId && scenes.length > 0) {
+      let frameOffset = 0;
+      
+      // Find the selected scene and calculate its start frame
+      for (const scene of scenes) {
+        if (scene.class === selectedSceneId) {
+          setCurrentFrame(frameOffset);
+          break;
+        }
+        frameOffset += scene.durationInFrames;
+      }
+    }
+  }, [selectedSceneId, scenes]);
+
+  // Calculate total duration of all scenes
+  const totalDuration = scenes.reduce((sum, scene) => sum + scene.durationInFrames, 0);
+  
+  return (
+    <div className="bg-white w-full">
+      <div className="w-full aspect-video flex flex-col justify-center items-center border-red border-[1px] rounded">
+        <Player
+          fps={30}
+          component={VideoComponent}
+          inputProps={{ scenes }}
+          durationInFrames={totalDuration || 3600}
+          compositionHeight={1080}
+          compositionWidth={1920}
+          loop
+          style={{
+            width: "100%",
+          }}
+          controls
+          initialFrame={currentFrame}
+          acknowledgeRemotionLicense
+        />
+      </div>
+    </div>
+  );
 }
 
 // TODO: Handle Video, Audio;
