@@ -1,4 +1,5 @@
 export type RemotionObjectBase = {
+	id?: string;
 	class: string;
 	durationInFrames: number;
 };
@@ -47,8 +48,16 @@ export type Video = {
 
 // <audio src="/"/>
 export type Audio = {
+	id?: string;
 	type: "audio";
 	durationInFrames: number;
 };
 
-export type RemotionObject = Title | Heading | Paragraph | Image;
+export type RemotionObject =
+	| Title
+	| SubTitle
+	| Heading
+	| Paragraph
+	| Image
+	| Video
+	| Audio;
