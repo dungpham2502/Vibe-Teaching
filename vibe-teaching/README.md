@@ -1,8 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vibe Teaching
+
+An interactive educational platform that creates dynamic video lessons using AI and Remotion.
+
+## Overview
+
+Vibe Teaching is a Next.js application that allows educators to create engaging video lessons. The platform uses AI to help generate educational content and Remotion to render this content into video presentations.
+
+## Features
+
+- **Interactive Lessons**: Create engaging educational content with dynamic animations
+- **Real-time Feedback**: See changes immediately as you edit your content
+- **AI Assistance**: Generate lesson content using AI technology
+- **Collaborative Tools**: Work together with other educators
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **Video Rendering**: Remotion
+- **State Management**: Zustand
+- **Styling**: Tailwind CSS
+- **API**: Next.js API Routes
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
