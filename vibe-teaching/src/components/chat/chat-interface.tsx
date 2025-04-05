@@ -12,6 +12,7 @@ interface ChatInterfaceProps {
   onReceiveMessage?: (message: string) => void
   initialMessages?: Message[]
   onMessagesChange?: (messages: Message[]) => void
+  isFullWidth?: boolean
 }
 
 export default function ChatInterface({
@@ -19,6 +20,7 @@ export default function ChatInterface({
   onReceiveMessage,
   initialMessages = [],
   onMessagesChange,
+  isFullWidth = false,
 }: ChatInterfaceProps) {
   const { messages, isStreaming, sendMessage } = useChat({
     onSendMessage,
@@ -76,7 +78,10 @@ export default function ChatInterface({
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
-      <div className="flex-grow overflow-y-auto p-4">
+      <div className={cn(
+        "flex-grow overflow-y-auto",
+        isFullWidth ? "px-2 py-4" : "p-4"
+      )}>
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -102,8 +107,14 @@ export default function ChatInterface({
         </div>
       </div>
 
-      <div className="p-4 bg-gray-50">
-        <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+      <div className={cn(
+        "bg-gray-50",
+        isFullWidth ? "px-2 py-4" : "p-4"
+      )}>
+        <form onSubmit={handleSubmit} className={cn(
+          "mx-auto",
+          isFullWidth ? "max-w-3xl" : "max-w-2xl"
+        )}>
           <div className="relative w-full rounded-2xl border border-gray-200 bg-white p-3">
             <Textarea
               ref={textareaRef}
