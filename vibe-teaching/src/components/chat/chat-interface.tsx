@@ -465,7 +465,7 @@ export default function ChatInterface({
         <div
           className={cn(
             "max-w-[80%] px-4 py-2 rounded-2xl",
-            message.type === "user" ? "bg-white border border-gray-200 rounded-br-none" : "text-gray-900",
+            message.type === "user" ? "bg-white border border-gray-200 rounded-br-none text-black" : "text-gray-900",
           )}
         >
           {/* For user messages or completed system messages, render without animation */}
@@ -519,10 +519,9 @@ export default function ChatInterface({
   return (
     <div
       ref={mainContainerRef}
-      className="bg-gray-50 flex flex-col overflow-hidden"
-      style={{ height: isMobile ? `${viewportHeight}px` : "100svh" }}
+      className="bg-gray-50 flex flex-col h-full overflow-hidden"
     >
-      <header className="fixed top-0 left-0 right-0 h-12 flex items-center px-4 z-20 bg-gray-50">
+      <header className="h-12 flex items-center px-4 bg-gray-50">
         <div className="w-full flex items-center justify-between px-2">
           <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
             <Menu className="h-5 w-5 text-gray-700" />
@@ -538,8 +537,8 @@ export default function ChatInterface({
         </div>
       </header>
 
-      <div ref={chatContainerRef} className="flex-grow pb-32 pt-12 px-4 overflow-y-auto">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <div ref={chatContainerRef} className="flex-grow overflow-y-auto">
+        <div className="space-y-4">
           {messageSections.map((section, sectionIndex) => (
             <div
               key={section.id}
@@ -565,8 +564,8 @@ export default function ChatInterface({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-50">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+      <div className="bg-gray-50 p-4">
+        <form onSubmit={handleSubmit}>
           <div
             ref={inputContainerRef}
             className={cn(
@@ -600,7 +599,7 @@ export default function ChatInterface({
                     variant="outline"
                     size="icon"
                     className={cn(
-                      "rounded-full h-8 w-8 flex-shrink-0 border-gray-200 p-0 transition-colors",
+                      "rounded-full h-8 w-8 flex-shrink-0 border-gray-200 p-0 transition-colors bg-white",
                       activeButton === "add" && "bg-gray-100 border-gray-300",
                     )}
                     onClick={() => toggleButton("add")}
@@ -614,7 +613,7 @@ export default function ChatInterface({
                     type="button"
                     variant="outline"
                     className={cn(
-                      "rounded-full h-8 px-3 flex items-center border-gray-200 gap-1.5 transition-colors",
+                      "rounded-full h-8 px-3 flex items-center border-gray-200 gap-1.5 transition-colors bg-white",
                       activeButton === "deepSearch" && "bg-gray-100 border-gray-300",
                     )}
                     onClick={() => toggleButton("deepSearch")}
@@ -630,7 +629,7 @@ export default function ChatInterface({
                     type="button"
                     variant="outline"
                     className={cn(
-                      "rounded-full h-8 px-3 flex items-center border-gray-200 gap-1.5 transition-colors",
+                      "rounded-full h-8 px-3 flex items-center border-gray-200 gap-1.5 transition-colors bg-white",
                       activeButton === "think" && "bg-gray-100 border-gray-300",
                     )}
                     onClick={() => toggleButton("think")}
