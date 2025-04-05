@@ -11,12 +11,14 @@ interface ChatInterfaceProps {
   onSendMessage?: (message: string) => void
   onReceiveMessage?: (message: string) => void
   initialMessages?: Message[]
+  onMessagesChange?: (messages: Message[]) => void
 }
 
 export default function ChatInterface({
   onSendMessage,
   onReceiveMessage,
   initialMessages = [],
+  onMessagesChange,
 }: ChatInterfaceProps) {
   const { messages, isStreaming, sendMessage } = useChat({
     onSendMessage,
@@ -32,6 +34,13 @@ export default function ChatInterface({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Notify parent component of message changes
+  useEffect(() => {
+    if (onMessagesChange) {
+      onMessagesChange(messages)
+    }
+  }, [messages, onMessagesChange])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!isStreaming) {
