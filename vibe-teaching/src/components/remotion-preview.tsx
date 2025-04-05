@@ -2,10 +2,10 @@ import { Player } from "@remotion/player";
 import { RemotionObject, Scene } from "@/types/remotion-types";
 import { AbsoluteFill, Series } from "remotion";
 
-export function Preview({ scenes }: { scenes: Scene[] }) {
+export function RemotionPreview({ scenes }: { scenes: Scene[] }) {
 	return (
-		<div className="bg-black w-[1000px]">
-			<div className="w-full aspect-video flex flex-col justify-center items-center border-red border-[1px] rounded bg-gray">
+		<div className="bg-white w-full">
+			<div className="w-full aspect-video flex flex-col justify-center items-center border-red border-[1px] rounded">
 				<Player
 					fps={30}
 					component={VideoComponent}
@@ -27,7 +27,7 @@ export function Preview({ scenes }: { scenes: Scene[] }) {
 
 // TODO: Handle Video, Image, Audio;
 
-function VideoComponent({ scenes }: { scenes: Scene[] }) {
+export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 	return (
 		<Series>
 			{scenes.map((scene: Scene) => (

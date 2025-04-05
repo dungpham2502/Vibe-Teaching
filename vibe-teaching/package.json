@@ -20,12 +20,11 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "4.0.286",
-
     "remotion-animated": "^2.2.0",
     "simple-xml-to-json": "^1.2.3",
-
     "tailwind-merge": "^3.1.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
