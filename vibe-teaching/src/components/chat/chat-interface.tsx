@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ArrowUp } from "lucide-react"
+import { ArrowUp, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,36 @@ interface ChatInterfaceProps {
   initialMessages?: Message[]
   onMessagesChange?: (messages: Message[]) => void
   isFullWidth?: boolean
+}
+
+// Component to format message content, replacing XML with video icon
+const FormattedMessage = ({ content }: { content: string }) => {
+  // Function to check if the content contains XML
+  const hasXmlContent = content.includes("<content>") && content.includes("</content>");
+  
+  if (!hasXmlContent) {
+    // If no XML, just return the content as is
+    return <>{content}</>;
+  }
+  
+  // Find the XML part to replace
+  const xmlStartIndex = content.indexOf("<content>");
+  const xmlEndIndex = content.lastIndexOf("</content>") + "</content>".length;
+  
+  // Split the content into parts
+  const beforeXml = content.substring(0, xmlStartIndex);
+  const afterXml = content.substring(xmlEndIndex);
+  
+  return (
+    <>
+      {beforeXml}
+      <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
+        <Video className="w-8 h-8 text-blue-500 mr-3" />
+        <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
+      </div>
+      {afterXml}
+    </>
+  );
 }
 
 export default function ChatInterface({
@@ -93,13 +123,13 @@ export default function ChatInterface({
             >
               <div
                 className={cn(
-                  "max-w-[80%] px-4 py-2 rounded-2xl",
+                  "max-w-[80%] px-4 py-2 rounded-2xl overflow-auto max-h-[70vh]",
                   message.type === "user"
                     ? "bg-white border border-gray-200 rounded-br-none text-black"
                     : "bg-gray-100 text-gray-900"
                 )}
               >
-                {message.content}
+                <FormattedMessage content={message.content} />
               </div>
             </div>
           ))}

@@ -38,6 +38,7 @@ export function useChat({
 
 			const data = await response.json();
 			console.log(data.xmlContent);
+			// console.log(data.content);
 			return (
 				data.content ||
 				"I'm sorry, I couldn't process your request at the moment."
@@ -49,26 +50,48 @@ export function useChat({
 	};
 
 	const streamResponse = async (text: string) => {
+		setIsStreaming(true);
+		
+		// Split text into words
 		const words = text.split(" ");
 		let currentContent = "";
-		setIsStreaming(true);
-
-		for (let i = 0; i < words.length; i += 2) {
-			const chunk = words.slice(i, i + 2).join(" ");
-			currentContent += chunk + " ";
-
+		
+		// Determine appropriate chunk size and delay based on content length
+		// For XML content, use larger chunks but keep streaming visible
+		const isLongContent = text.length > 1000;
+		const chunkSize = isLongContent ? 10 : 2;
+		const delay = isLongContent ? 20 : 40;
+		
+		try {
+			// Stream the content in chunks
+			for (let i = 0; i < words.length; i += chunkSize) {
+				const chunk = words.slice(i, i + chunkSize).join(" ");
+				currentContent += chunk + " ";
+				
+				setMessages((prev) =>
+					prev.map((msg, idx) =>
+						idx === prev.length - 1
+							? { ...msg, content: currentContent.trim() }
+							: msg
+					)
+				);
+				
+				// Use a proper delay to ensure UI updates
+				await new Promise((resolve) => setTimeout(resolve, delay));
+			}
+		} catch (error) {
+			console.error("Error streaming response:", error);
+		} finally {
+			// Ensure final content is set and streaming state is properly turned off
 			setMessages((prev) =>
 				prev.map((msg, idx) =>
 					idx === prev.length - 1
-						? { ...msg, content: currentContent.trim() }
+						? { ...msg, content: text.trim() }
 						: msg
 				)
 			);
-
-			await new Promise((resolve) => setTimeout(resolve, 40));
+			setIsStreaming(false);
 		}
-
-		setIsStreaming(false);
 	};
 
 	const sendMessage = async (message: string) => {
