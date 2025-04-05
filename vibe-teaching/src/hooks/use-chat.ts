@@ -44,6 +44,7 @@ export function useChat({
 
 			const data = await response.json();
 			console.log(data.jsonContent);
+			setScenes(data.jsonContent);
 			return (
 				data.content ||
 				"I'm sorry, I couldn't process your request at the moment."
