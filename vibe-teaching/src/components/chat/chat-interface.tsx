@@ -565,7 +565,7 @@ export default function ChatInterface({
       </div>
 
       <div className="bg-gray-50 p-4">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
           <div
             ref={inputContainerRef}
             className={cn(
@@ -662,4 +662,4 @@ export default function ChatInterface({
       </div>
     </div>
   )
-} 
+}
