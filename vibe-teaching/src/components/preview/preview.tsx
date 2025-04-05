@@ -3,7 +3,6 @@
 import { useRef, useEffect } from "react";
 import { RemotionPreview } from "../remotion-preview";
 import { useScenesStore } from "@/store/useScenesStore";
-import { Scene } from "@/types/remotion-types";
 
 interface TimelineItem {
 	id: string;
@@ -22,10 +21,18 @@ export default function Preview({
 	isLoading = false,
 }: PreviewProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
-	const { scenes, selectedSceneId } = useScenesStore();
+	const { scenes, selectedSceneId, setSelectedSceneId } = useScenesStore();
 	
 	// Find the selected scene from the global store
 	const selectedScene = scenes.find(scene => scene.class === selectedSceneId);
+
+	// If there's a selected item via props but no selectedSceneId in global state,
+	// update the global state to match
+	useEffect(() => {
+		if (selectedItem?.id && !selectedSceneId && scenes.some(scene => scene.class === selectedItem.id)) {
+			setSelectedSceneId(selectedItem.id);
+		}
+	}, [selectedItem, selectedSceneId, scenes, setSelectedSceneId]);
 
 	// Reset video when selectedItem changes
 	useEffect(() => {
@@ -69,10 +76,17 @@ export default function Preview({
 						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
 						<p className="text-gray-600">Generating preview...</p>
 					</div>
+				) : scenes.length === 0 ? (
+					<div className="text-center p-8">
+						<p className="text-gray-600">No scenes available</p>
+						<p className="text-gray-400 text-sm mt-2">
+							Chat with the AI to generate scenes
+						</p>
+					</div>
 				) : selectedScene ? (
 					<div className="w-full h-full relative">
 						{/* Use RemotionPreview component with the scenes data */}
-						<RemotionPreview scenes={scenes} />
+						<RemotionPreview scenes={scenes} selectedSceneId={selectedSceneId} />
 						
 						{/* Scene information overlay */}
 						{renderSceneInfo()}
