@@ -1,6 +1,7 @@
 import { Player } from "@remotion/player";
 import { RemotionObject, Scene } from "@/types/remotion-types";
 import { AbsoluteFill, Series } from "remotion";
+import { cn } from "@/lib/utils";
 
 export function RemotionPreview({ scenes }: { scenes: Scene[] }) {
 	return (
@@ -25,26 +26,82 @@ export function RemotionPreview({ scenes }: { scenes: Scene[] }) {
 	);
 }
 
-// TODO: Handle Video, Image, Audio;
+// TODO: Handle Video, Audio;
 
 export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 	return (
 		<Series>
 			{scenes.map((scene: Scene) => (
-				<Series.Sequence durationInFrames={scene.durationInFrames}>
-					<AbsoluteFill>
+				<Series.Sequence key={scene.class} durationInFrames={scene.durationInFrames}>
+					<AbsoluteFill className={cn("flex flex-col items-center justify-center p-20", scene.class)}>
 						{scene.children.map((item: RemotionObject) => {
 							switch (item.type) {
 								case "title":
-									return <p className="text-9xl">{item.text}</p>;
+									return (
+										<h1 
+											key={item.class} 
+											className={cn(
+												"text-9xl font-bold mb-8 text-center", 
+												item.class
+											)}
+										>
+											{item.text}
+										</h1>
+									);
 								case "subtitle":
-									return <p className="text-2xl">{item.text}</p>;
+									return (
+										<h2 
+											key={item.class} 
+											className={cn(
+												"text-6xl font-semibold my-4 text-center", 
+												item.class
+											)}
+										>
+											{item.text}
+										</h2>
+									);
 								case "heading":
-									return <p className="text-7xl">{item.text}</p>;
+									return (
+										<h3 
+											key={item.class} 
+											className={cn(
+												"text-7xl font-medium my-6 text-center", 
+												item.class
+											)}
+										>
+											{item.text}
+										</h3>
+									);
 								case "paragraph":
-									return <p className="text-2xl">{item.text}</p>;
+									return (
+										<p 
+											key={item.class} 
+											className={cn(
+												"text-4xl my-4 text-center max-w-4xl",
+												item.class
+											)}
+										>
+											{item.text}
+										</p>
+									);
+								case "image":
+									return (
+										<div 
+											key={item.class} 
+											className={cn(
+												"my-6 flex justify-center items-center",
+												item.class
+											)}
+										>
+											<img 
+												src={item.src} 
+												alt="" 
+												className="max-w-2xl max-h-[40vh] object-contain" 
+											/>
+										</div>
+									);
 								default:
-									return <div>Item not supported</div>;
+									return <div key={item.id || item.class}>Item not supported</div>;
 							}
 						})}
 					</AbsoluteFill>
