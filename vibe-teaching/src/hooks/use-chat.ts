@@ -24,27 +24,22 @@ export function useChat({
 
   const getAIResponse = async (userMessage: string) => {
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
+      const response = await fetch('/api/chat', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userMessage }),
-      })
+        body: JSON.stringify({ prompt: userMessage }),
+      });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error('Failed to get AI response');
       }
 
-      const contentType = response.headers.get("content-type")
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Response was not JSON")
-      }
-
-      const data = await response.json()
-      return data.response
+      const data = await response.json();
+      return data.content || "I'm sorry, I couldn't process your request at the moment.";
     } catch (error) {
-      console.error("Error fetching AI response:", error)
+      console.error("Error getting AI response:", error)
       return "I'm sorry, I couldn't process your request at the moment."
     }
   }
