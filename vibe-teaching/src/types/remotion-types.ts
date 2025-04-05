@@ -1,5 +1,5 @@
 export type RemotionObjectBase = {
-	id?: string;
+	id: string;
 	class: string;
 	durationInFrames: number;
 };
@@ -7,7 +7,7 @@ export type RemotionObjectBase = {
 export type Scene = {
 	type: "scene";
 	desc: string;
-	children: (Title | Heading | Paragraph | Image)[];
+	children: RemotionObject[];
 } & RemotionObjectBase;
 
 // <title></title>
@@ -20,7 +20,7 @@ export type Title = {
 export type SubTitle = {
 	type: "subtitle";
 	text: string;
-};
+} & RemotionObjectBase;
 
 // <heading></heading>
 export type Heading = {
@@ -48,8 +48,9 @@ export type Video = {
 
 // <audio src="/"/>
 export type Audio = {
-	id?: string;
+	id: string;
 	type: "audio";
+	class: string;
 	durationInFrames: number;
 };
 
