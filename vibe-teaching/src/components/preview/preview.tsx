@@ -3,12 +3,12 @@
 import { useRef, useEffect } from "react";
 import { RemotionPreview } from "../remotion-preview";
 import { useScenesStore } from "@/store/useScenesStore";
-import { Scene, Title, Heading, Paragraph } from "@/types/remotion-types";
+import { Scene } from "@/types/remotion-types";
 
 interface TimelineItem {
 	id: string;
 	title: string;
-	videoUrl: string;
+	videoUrl?: string;
 	thumbnail?: string;
 }
 
@@ -23,6 +23,9 @@ export default function Preview({
 }: PreviewProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const { scenes, selectedSceneId } = useScenesStore();
+	
+	// Find the selected scene from the global store
+	const selectedScene = scenes.find(scene => scene.class === selectedSceneId);
 
 	// Reset video when selectedItem changes
 	useEffect(() => {
@@ -30,6 +33,31 @@ export default function Preview({
 			videoRef.current.load();
 		}
 	}, [selectedItem]);
+
+	// Helper function to render selected scene information
+	const renderSceneInfo = () => {
+		if (!selectedScene) return null;
+		
+		return (
+			<div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-md space-y-2 max-w-xs">
+				<h3 className="font-bold text-base">{selectedScene.desc}</h3>
+				<p className="text-xs text-gray-600">Duration: {selectedScene.durationInFrames} frames</p>
+				<p className="text-xs text-gray-600">Elements: {selectedScene.children.length}</p>
+				{selectedScene.children.map((child, index) => (
+					<div key={child.class} className="text-xs">
+						<span className="font-medium">{child.type}:</span> {
+							'text' in child ? child.text : 
+							'src' in child ? child.src : 
+							child.class
+						}
+					</div>
+				)).slice(0, 3)}
+				{selectedScene.children.length > 3 && (
+					<p className="text-xs text-gray-400">+ {selectedScene.children.length - 3} more elements</p>
+				)}
+			</div>
+		);
+	};
 
 	return (
 		<div className="h-screen bg-white p-4 flex flex-col">
@@ -41,27 +69,19 @@ export default function Preview({
 						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
 						<p className="text-gray-600">Generating preview...</p>
 					</div>
-				) : selectedItem ? (
+				) : selectedScene ? (
 					<div className="w-full h-full relative">
+						{/* Use RemotionPreview component with the scenes data */}
 						<RemotionPreview scenes={scenes} />
-						{/* <video
-              ref={videoRef}
-              className="w-full h-full object-contain"
-              controls
-              poster={selectedItem.thumbnail || "/placeholder-video.jpg"}
-            >
-              <source src={selectedItem.videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video> */}
-						<div className="absolute bottom-4 left-4 bg-white px-3 py-1 rounded-full shadow-md text-sm font-medium">
-							{selectedItem.title}
-						</div>
+						
+						{/* Scene information overlay */}
+						{renderSceneInfo()}
 					</div>
 				) : (
 					<div className="text-center p-8">
-						<p className="text-gray-600">No content selected</p>
+						<p className="text-gray-600">No scene selected</p>
 						<p className="text-gray-400 text-sm mt-2">
-							Select an item from the timeline to preview
+							Select a scene from the timeline to preview
 						</p>
 					</div>
 				)}
