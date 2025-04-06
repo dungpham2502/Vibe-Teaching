@@ -37,11 +37,11 @@ function extractXmlContent(text: string): string | null {
 	return null;
 }
 
-function convertXML(inp: string) {
+function convertXML(inp: string): Record<string, any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	const parser = new xml2js.Parser({ explicitArray: false });
 
 	// Example usage:
-	let res = {};
+	let res: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 	parser.parseString(inp, (err, result) => {
 		if (err) {
 			res = {};
@@ -64,6 +64,12 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 	try {
 		// Convert XML to intermediate JSON format
 		const intermediateJson = convertXML(xmlContent);
+
+		// Ensure scene is an array before converting to Remotion types
+		if (intermediateJson?.content?.scene && !Array.isArray(intermediateJson.content.scene)) {
+			// If scene is not an array, wrap it in an array
+			intermediateJson.content.scene = [intermediateJson.content.scene];
+		}
 
 		// Convert intermediate JSON to Remotion types
 		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
