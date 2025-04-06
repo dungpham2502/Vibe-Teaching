@@ -7,71 +7,63 @@ import {
 	SubTitle,
 	Title,
 } from "@/types/remotion-types";
+import { v4 as uuidv4 } from "uuid";
 
 export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
-	if (!jsonData?.content?.children) {
-		throw new Error("Invalid JSON structure: Expected video.children array");
+	if (!jsonData?.content) {
+		console.error(jsonData);
+		throw new Error("Invalid JSON structure: Expected video.content array");
 	}
 
 	const scenes: Scene[] = [];
 
-	for (const sceneObj of jsonData.content.children) {
-		if (!sceneObj.scene) continue;
-
-		const sceneData = sceneObj.scene;
+	for (const sceneObj of jsonData.content.scene) {
 		const children: RemotionObject[] = [];
-
-		// Process scene's children
-		if (Array.isArray(sceneData.children)) {
-			for (const child of sceneData.children) {
-				if (child.title) {
-					children.push({
-						type: "title",
-						class: child.title.class,
-						durationInFrames: parseInt(child.title.durationInFrames, 10),
-						text: child.title.content,
-					} as Title);
-				} else if (child.subtitle) {
-					children.push({
-						type: "subtitle",
-						class: child.subtitle.class,
-						durationInFrames: parseInt(child.subtitle.durationInFrames, 10),
-						text: child.subtitle.content,
-					} as SubTitle);
-				} else if (child.heading) {
-					children.push({
-						type: "heading",
-						class: child.heading.class,
-						durationInFrames: parseInt(child.heading.durationInFrames, 10),
-						text: child.heading.content,
-					} as Heading);
-				} else if (child.paragraph) {
-					children.push({
-						type: "paragraph",
-						class: child.paragraph.class,
-						durationInFrames: parseInt(child.paragraph.durationInFrames, 10),
-						text: child.paragraph.content,
-					} as Paragraph);
-				} else if (child.image) {
-					children.push({
-						type: "image",
-						class: child.image.class,
-						durationInFrames: parseInt(child.image.durationInFrames, 10),
-						src: child.image.src,
-					} as Image);
-				}
-			}
+		if (sceneObj.title) {
+			children.push({
+				type: "title",
+				class: sceneObj.title.$,
+				durationInFrames: parseInt(sceneObj.title.$.durationInFrames, 10),
+				text: sceneObj.title._,
+			} as Title);
+		} else if (sceneObj.subtitle) {
+			children.push({
+				type: "subtitle",
+				class: sceneObj.subtitle.$,
+				durationInFrames: parseInt(sceneObj.subtitle.$.durationInFrames, 10),
+				text: sceneObj.subtitle._,
+			} as SubTitle);
+		} else if (sceneObj.heading) {
+			children.push({
+				type: "heading",
+				class: sceneObj.heading.$,
+				durationInFrames: parseInt(sceneObj.heading.$.durationInFrames, 10),
+				text: sceneObj.heading._,
+			} as Heading);
+		} else if (sceneObj.paragraph) {
+			children.push({
+				type: "paragraph",
+				class: sceneObj.paragraph.$,
+				durationInFrames: parseInt(sceneObj.paragraph.$.durationInFrames, 10),
+				text: sceneObj.paragraph._,
+			} as Paragraph);
+		} else if (sceneObj.image) {
+			children.push({
+				type: "image",
+				class: sceneObj.image.$,
+				durationInFrames: parseInt(sceneObj.image.$.durationInFrames, 10),
+				src: sceneObj.image._,
+			} as Image);
 		}
-
-		// Create the scene object
 		scenes.push({
 			type: "scene",
-			class: sceneData.class,
-			durationInFrames: parseInt(sceneData.durationInFrames, 10),
-			desc: sceneData.desc,
-			children,
-		} as Scene);
+			id: uuidv4(),
+			class: sceneObj.$,
+			durationInFrames: parseInt(sceneObj.$.durationInFrames, 10),
+			desc: sceneObj.$.desc,
+			children: children,
+		});
 	}
-
+	console.log(scenes);
 	return scenes;
 }

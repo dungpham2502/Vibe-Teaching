@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
-import { convertJsonToRemotionTypes } from "@/lib/json-parser";
-import { Scene } from "@/types/remotion-types";
-import { v4 as uuidv4 } from "uuid";
 
 export type MessageType = "user" | "system";
 
@@ -44,7 +41,7 @@ export function useChat({
 
 			const data = await response.json();
 			console.log(data.jsonContent);
-			setScenes(data.jsonContent);
+			setScenes(data.jsonContent || []);
 			return (
 				data.content ||
 				"I'm sorry, I couldn't process your request at the moment."

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { systemPrompt, userPrompt } from "@/utils/groq/prompts";
-import { convertJsonToRemotionTypes } from "@/lib/json-parser";
-import { convertXML } from "simple-xml-to-json";
 import { Scene } from "@/types/remotion-types";
+import { convertJsonToRemotionTypes } from "@/lib/json-parser";
+import { v4 as uuidv4 } from "uuid";
+import xml2js from "xml2js";
 
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY!,
@@ -18,21 +19,39 @@ function extractXmlContent(text: string): string | null {
 	// Look for content between triple backticks with or without 'xml' marker
 	const xmlRegex = /```(?:xml)?\s*(<content>[\s\S]*?<\/content>)\s*```/;
 	const match = text.match(xmlRegex);
-	
+
 	if (match && match[1]) {
 		// Return only the XML content without the backticks and language marker
 		return match[1];
 	}
-	
+
 	// If not found with backticks, try direct XML detection
 	const directXmlRegex = /(<content>[\s\S]*?<\/content>)/;
 	const directMatch = text.match(directXmlRegex);
-	
+
 	if (directMatch && directMatch[1]) {
 		return directMatch[1];
 	}
-	
+
 	return null;
+}
+
+function convertXML(inp: any) {
+	const parser = new xml2js.Parser({ explicitArray: false });
+
+	// Example usage:
+	let res = {};
+	parser.parseString(inp, (err, result) => {
+		if (err) {
+			console.log(err.message);
+			console.log("ERRROR!!!!!!");
+			res = {};
+		} else {
+			console.log("RESULT: ", JSON.stringify(result, null, 4));
+			res = result;
+		}
+	});
+	return res;
 }
 
 /**
@@ -43,30 +62,33 @@ function extractXmlContent(text: string): string | null {
  */
 function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 	if (!xmlContent) return null;
-	
+
 	try {
 		// Convert XML to intermediate JSON format
 		const intermediateJson = convertXML(xmlContent);
-		
+
 		// Convert intermediate JSON to Remotion types
 		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
-		
+
 		// Add unique keys to each scene and its children
 		return remotionJson.map((scene, sceneIndex) => {
 			// Add unique key to scene
 			const sceneWithKey = {
 				...scene,
-				id: `scene-${sceneIndex}`,
+				// id: `scene-${sceneIndex}`,
+				id: uuidv4(),
 			};
-			
+
 			// Add unique keys to children
 			if (sceneWithKey.children && sceneWithKey.children.length > 0) {
-				sceneWithKey.children = sceneWithKey.children.map((child, childIndex) => ({
-					...child,
-					id: `${sceneWithKey.id}-child-${childIndex}`,
-				}));
+				sceneWithKey.children = sceneWithKey.children.map(
+					(child, childIndex) => ({
+						...child,
+						id: uuidv4(),
+					})
+				);
 			}
-			
+
 			return sceneWithKey;
 		});
 	} catch (error) {
@@ -95,10 +117,13 @@ export async function POST(request: Request) {
 
 		// Extract XML content if present
 		const xmlContent = extractXmlContent(responseContent);
-		
+
+		console.log("XML: ", xmlContent);
+
 		// Convert XML to JSON if XML content is found
 		const jsonContent = convertXmlToJson(xmlContent);
 
+		console.log("JSON: ", jsonContent);
 		// Return the full response, extracted XML, and the converted JSON
 		return NextResponse.json(
 			{
