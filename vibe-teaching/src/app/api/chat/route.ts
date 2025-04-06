@@ -44,7 +44,6 @@ function convertXML(inp: any) {
 	parser.parseString(inp, (err, result) => {
 		if (err) {
 			console.log(err.message);
-			console.log("ERRROR!!!!!!");
 			res = {};
 		} else {
 			console.log("RESULT: ", JSON.stringify(result, null, 4));

@@ -85,16 +85,6 @@ export default function Preview({
 		<div className="h-screen bg-white p-4 flex flex-col">
 			<h2 className="text-xl font-bold mb-4">Preview</h2>
 
-			{/* Debug toggle button */}
-			{/* <button 
-				onClick={toggleDebug}
-				className={`absolute top-4 right-4 z-50 px-3 py-2 rounded-md text-xs font-mono transition-colors ${
-					debug ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'
-				}`}
-			>
-				{debug ? 'Debug: ON' : 'Debug: OFF'}
-			</button> */}
-
 			<div className="flex-grow flex items-center justify-center relative bg-gray-100 rounded-lg">
 				{isLoading ? (
 					<div className="text-center p-8">
