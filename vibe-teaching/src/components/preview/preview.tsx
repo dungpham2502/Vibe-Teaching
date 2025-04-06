@@ -21,7 +21,7 @@ export default function Preview({
 	isLoading = false,
 }: PreviewProps) {
 	const videoRef = useRef<HTMLVideoElement>(null);
-	const { scenes, selectedSceneId, setSelectedSceneId } = useScenesStore();
+	const { scenes, selectedSceneId, setSelectedSceneId, currentFrame, setCurrentFrame, debug, toggleDebug } = useScenesStore();
 	
 	// Find the selected scene from the global store
 	const selectedScene = scenes.find(scene => scene.class === selectedSceneId);
@@ -31,8 +31,18 @@ export default function Preview({
 	useEffect(() => {
 		if (selectedItem?.id && !selectedSceneId && scenes.some(scene => scene.class === selectedItem.id)) {
 			setSelectedSceneId(selectedItem.id);
+			
+			// Also update the current frame to show the beginning of this scene
+			let frameOffset = 0;
+			for (const scene of scenes) {
+				if (scene.class === selectedItem.id) {
+					setCurrentFrame(frameOffset);
+					break;
+				}
+				frameOffset += scene.durationInFrames;
+			}
 		}
-	}, [selectedItem, selectedSceneId, scenes, setSelectedSceneId]);
+	}, [selectedItem, selectedSceneId, scenes, setSelectedSceneId, setCurrentFrame]);
 
 	// Reset video when selectedItem changes
 	useEffect(() => {
@@ -69,6 +79,16 @@ export default function Preview({
 	return (
 		<div className="h-screen bg-white p-4 flex flex-col">
 			<h2 className="text-xl font-bold mb-4">Preview</h2>
+
+			{/* Debug toggle button */}
+			{/* <button 
+				onClick={toggleDebug}
+				className={`absolute top-4 right-4 z-50 px-3 py-2 rounded-md text-xs font-mono transition-colors ${
+					debug ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'
+				}`}
+			>
+				{debug ? 'Debug: ON' : 'Debug: OFF'}
+			</button> */}
 
 			<div className="flex-grow flex items-center justify-center relative bg-gray-100 rounded-lg">
 				{isLoading ? (
