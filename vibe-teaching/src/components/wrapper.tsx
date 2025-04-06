@@ -55,7 +55,7 @@ const WelcomeScreen = () => {
         >
           <Image 
             src="/welcome-illustration.svg" 
-            alt="Welcome to Vibe Teaching"
+            alt="Welcome to Vibe Slide"
             fill
             className="object-contain"
             priority
@@ -224,7 +224,7 @@ export default function Wrapper() {
                 >
                   <Image 
                     src="/welcome-illustration.svg" 
-                    alt="Welcome to Vibe Teaching"
+                    alt="Welcome to Vibe Slide"
                     fill
                     className="object-contain"
                     priority
@@ -236,7 +236,7 @@ export default function Wrapper() {
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="text-3xl font-bold mb-4 text-center text-indigo-700 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600"
                 >
-                  Welcome to Vibe Teaching
+                  Welcome to Slide
                 </motion.h1>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
