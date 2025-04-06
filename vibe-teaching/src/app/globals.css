@@ -175,3 +175,29 @@ textarea::-webkit-scrollbar-thumb:hover {
   border: 2px dashed;
   border-image: linear-gradient(to right, #f59e0b, #10b981, #3b82f6, #8b5cf6) 1;
 }
+
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
+
+.animate-pulse-dot1 {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-dot2 {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+
+.animate-pulse-dot3 {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+  animation-delay: 0.4s;
+}

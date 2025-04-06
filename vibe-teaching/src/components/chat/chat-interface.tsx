@@ -299,43 +299,31 @@ export default function ChatInterface({
       >
         <div className="space-y-6 max-w-4xl mx-auto">
           {messages.length > 0 ? (
-            <AnimatePresence>
-              {messages.map((message) => (
-                <ChatBubble key={message.id} type={message.type}>
-                  <FormattedMessage content={message.content} />
-                </ChatBubble>
-              ))}
+            <>
+              <AnimatePresence>
+                {messages.map((message) => (
+                  <ChatBubble key={message.id} type={message.type}>
+                    <FormattedMessage content={message.content} />
+                  </ChatBubble>
+                ))}
+              </AnimatePresence>
               
-              {/* Add thinking indicator when streaming */}
+              {/* Add thinking indicator when streaming - outside AnimatePresence */}
               {isStreaming && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="flex items-start"
-                >
+                <div className="flex items-start mt-2">
                   <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-none bg-gradient-to-r from-white to-blue-50 border border-blue-100 text-gray-900">
-                    <div className="flex space-x-2">
-                      <motion.div 
-                        animate={{ scale: [0.8, 1.2, 0.8] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        className="w-2 h-2 rounded-full bg-indigo-400" 
-                      />
-                      <motion.div 
-                        animate={{ scale: [0.8, 1.2, 0.8] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                        className="w-2 h-2 rounded-full bg-indigo-500" 
-                      />
-                      <motion.div 
-                        animate={{ scale: [0.8, 1.2, 0.8] }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-                        className="w-2 h-2 rounded-full bg-indigo-600" 
-                      />
+                    <div className="flex items-center space-x-3">
+                      <div className="flex space-x-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse-dot1" />
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse-dot2" />
+                        <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse-dot3" />
+                      </div>
+                      <span className="text-sm text-indigo-600 font-medium">Creating your lesson...</span>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </>
           ) : isFullWidth && showSuggestions ? (
             // Show suggestions in the chat area when in full width mode and no messages yet
             <div className="mt-8">

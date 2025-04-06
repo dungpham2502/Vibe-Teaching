@@ -92,24 +92,41 @@ export function useChat({
 
     const sendMessage = async (message: string) => {
         if (message.trim() && !isStreaming) {
-            // Call onSendMessage if provided
-            onSendMessage?.(message);
+            // Set streaming to true before starting the process
+            setIsStreaming(true);
+            
+            try {
+                // Call onSendMessage if provided
+                onSendMessage?.(message);
 
-            // Add user message using store action
-            addMessage(message, "user");
+                // Add user message using store action
+                addMessage(message, "user");
 
-            // Add empty system message that will be streamed
-            addMessage("", "system");
+                // Add empty system message that will be streamed
+                addMessage("", "system");
 
-            // Get and stream AI response with complete message history
-            // We need to pass the updated messages array for correct API call
-            const currentMessages = [...messages, 
-                { id: "", content: message, type: "user" as MessageType },
-                { id: "", content: "", type: "system" as MessageType }
-            ];
-            const response = await getAIResponse(currentMessages);
-            onReceiveMessage?.(response);
-            await streamResponse(response);
+                // Get and stream AI response with complete message history
+                // We need to pass the updated messages array for correct API call
+                const currentMessages = [...messages, 
+                    { id: "", content: message, type: "user" as MessageType },
+                    { id: "", content: "", type: "system" as MessageType }
+                ];
+                
+                console.log("Starting API call, isStreaming should be true");
+                const response = await getAIResponse(currentMessages);
+                onReceiveMessage?.(response);
+                
+                // Update the last message with the response
+                updateLastMessage(response.trim());
+            } catch (error) {
+                console.error("Error in sendMessage:", error);
+                // Add an error message
+                updateLastMessage("I'm sorry, I couldn't process your request at the moment.");
+            } finally {
+                // Only set streaming to false when everything is done
+                console.log("Setting isStreaming to false");
+                setIsStreaming(false);
+            }
         }
     };
 
