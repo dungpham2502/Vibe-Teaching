@@ -4,12 +4,14 @@ import { Scene } from "@/types/remotion-types";
 interface ScenesState {
 	scenes: Scene[];
 	selectedSceneId: string | null;
+	currentFrame: number;
 	debug: boolean;
 
 	setScenes: (scenes: Scene[]) => void;
 	addScene: (scene: Scene) => void;
 	removeScene: (id: string) => void;
 	setSelectedSceneId: (id: string | null) => void;
+	setCurrentFrame: (frame: number) => void;
 	toggleDebug: () => void;
 	logState: () => void;
 }
@@ -17,6 +19,7 @@ interface ScenesState {
 export const useScenesStore = create<ScenesState>((set, get) => ({
 	scenes: [],
 	selectedSceneId: null,
+	currentFrame: 0,
 	debug: false,
 
 	setScenes: (scenes) => {
@@ -35,7 +38,7 @@ export const useScenesStore = create<ScenesState>((set, get) => ({
 		const state = get();
 		if (state.debug) console.log("Removing scene with ID:", id);
 		set((state) => ({
-			scenes: state.scenes.filter((scene) => scene.class !== id),
+			scenes: state.scenes.filter((scene) => scene.id !== id),
 			// If the selected scene is removed, deselect it
 			selectedSceneId:
 				state.selectedSceneId === id ? null : state.selectedSceneId,
@@ -48,6 +51,12 @@ export const useScenesStore = create<ScenesState>((set, get) => ({
 		set({ selectedSceneId: id });
 	},
 
+	setCurrentFrame: (frame) => {
+		const state = get();
+		if (state.debug) console.log("Setting current frame:", frame);
+		set({ currentFrame: frame });
+	},
+
 	toggleDebug: () => set((state) => ({ debug: !state.debug })),
 
 	logState: () => {
@@ -55,6 +64,7 @@ export const useScenesStore = create<ScenesState>((set, get) => ({
 		console.log("Current scenes state:", {
 			scenes: state.scenes,
 			selectedSceneId: state.selectedSceneId,
+			currentFrame: state.currentFrame,
 			totalScenes: state.scenes.length,
 		});
 	},

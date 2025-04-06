@@ -71,7 +71,7 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
 
 		// Add unique keys to each scene and its children
-		return remotionJson.map((scene, sceneIndex) => {
+		return remotionJson.map((scene) => {
 			// Add unique key to scene
 			const sceneWithKey = {
 				...scene,
@@ -82,7 +82,7 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 			// Add unique keys to children
 			if (sceneWithKey.children && sceneWithKey.children.length > 0) {
 				sceneWithKey.children = sceneWithKey.children.map(
-					(child, childIndex) => ({
+					(child) => ({
 						...child,
 						id: uuidv4(),
 					})

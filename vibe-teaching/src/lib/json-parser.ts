@@ -23,7 +23,7 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 			children.push({
 				type: "title",
 				class: sceneObj.title.$,
-				durationInFrames: parseInt(sceneObj.title.$.durationInFrames, 10),
+				durationInFrames: parseInt(sceneObj.title.$.durationInFrames|| "150", 10),
 				text: sceneObj.title._,
 			} as Title);
 		}
@@ -31,7 +31,7 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 			children.push({
 				type: "subtitle",
 				class: sceneObj.subtitle.$,
-				durationInFrames: parseInt(sceneObj.subtitle.$.durationInFrames, 10),
+				durationInFrames: parseInt(sceneObj.subtitle.$.durationInFrames|| "150", 10),
 				text: sceneObj.subtitle._,
 			} as SubTitle);
 		}
@@ -39,7 +39,7 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 			children.push({
 				type: "heading",
 				class: sceneObj.heading.$,
-				durationInFrames: parseInt(sceneObj.heading.$.durationInFrames, 10),
+				durationInFrames: parseInt(sceneObj.heading.$.durationInFrames|| "150", 10),
 				text: sceneObj.heading._,
 			} as Heading);
 		}
@@ -47,24 +47,17 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 			children.push({
 				type: "paragraph",
 				class: sceneObj.paragraph.$,
-				durationInFrames: parseInt(sceneObj.paragraph.$.durationInFrames, 10),
+				durationInFrames: parseInt(sceneObj.paragraph.$.durationInFrames || "150", 10),
 				text: sceneObj.paragraph._,
 			} as Paragraph);
 		}
-		if (sceneObj.image) {
-			children.push({
-				type: "image",
-				class: sceneObj.image.$,
-				durationInFrames: parseInt(sceneObj.image.$.durationInFrames, 10),
-				src: sceneObj.image._,
-			} as Image);
-		}
+
 
 		scenes.push({
 			type: "scene",
 			id: uuidv4(),
 			class: sceneObj.$,
-			durationInFrames: parseInt(sceneObj.$.durationInFrames, 10),
+			durationInFrames: parseInt(sceneObj.$.durationInFrames|| "150", 10),
 			desc: sceneObj.$.desc,
 			children: children,
 		});

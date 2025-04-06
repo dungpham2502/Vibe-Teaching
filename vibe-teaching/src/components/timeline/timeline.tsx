@@ -15,19 +15,38 @@ interface TimelineProps {
 }
 
 export default function Timeline({ onSelectItem }: TimelineProps) {
-  const { scenes, selectedSceneId, setSelectedSceneId, debug } = useScenesStore();
+  const { scenes, selectedSceneId, setSelectedSceneId, setCurrentFrame, debug } = useScenesStore();
   
   // Select the first scene if one is available and none is currently selected
   useEffect(() => {
     if (scenes.length > 0 && !selectedSceneId) {
-      setSelectedSceneId(scenes[0].class);
-      if (debug) console.log("Auto-selected first scene:", scenes[0].class);
+      setSelectedSceneId(scenes[0].id);
+      setCurrentFrame(0); // Reset to first frame
+      if (debug) console.log("Auto-selected first scene:", scenes[0].id);
     }
-  }, [scenes, selectedSceneId, setSelectedSceneId, debug]);
+  }, [scenes, selectedSceneId, setSelectedSceneId, setCurrentFrame, debug]);
 
   const handleSceneClick = (scene: Scene) => {
     // Update selected scene in the global store
-    setSelectedSceneId(scene.class);
+    setSelectedSceneId(scene.id);
+    
+    // Calculate the starting frame for this scene
+    let frameOffset = 0;
+    for (const s of scenes) {
+      if (s.id === scene.id) {
+        break;
+      }
+      frameOffset += s.durationInFrames;
+    }
+    
+    // Update the current frame to the beginning of this scene
+    setCurrentFrame(frameOffset);
+    
+    if (debug) {
+      console.log(`Selected scene: ${scene.desc || 'Unnamed scene'}`);
+      console.log(`Starting at frame: ${frameOffset}`);
+      console.log(`Scene has ${scene.children.length} children`);
+    }
     
     // Also call the onSelectItem prop for backward compatibility
     if (onSelectItem) {
@@ -35,8 +54,8 @@ export default function Timeline({ onSelectItem }: TimelineProps) {
       const imageChild = scene.children.find(child => child.type === "image");
       
       onSelectItem({
-        id: scene.class,
-        title: scene.desc,
+        id: scene.id,
+        title: scene.desc || 'Unnamed scene',
         thumbnail: imageChild?.src || "/file.svg"
       });
     }
@@ -54,12 +73,12 @@ export default function Timeline({ onSelectItem }: TimelineProps) {
         </div>
       ) : (
         <div className="space-y-3">
-          {scenes.map((scene) => (
+          {scenes.map((scene, index) => (
             <div
-              key={scene.class}
+              key={scene.id || `scene-${index}`}
               className={cn(
                 "p-3 rounded-lg cursor-pointer transition-all border",
-                selectedSceneId === scene.class
+                selectedSceneId === scene.id
                   ? "bg-blue-50 border-blue-400 shadow"
                   : "bg-white border-gray-200 hover:bg-gray-50"
               )}
@@ -77,11 +96,16 @@ export default function Timeline({ onSelectItem }: TimelineProps) {
                     <span className="text-xl">🎬</span>
                   )}
                 </div>
-                <div>
-                  <h3 className="font-medium">{scene.desc}</h3>
-                  <p className="text-sm text-gray-500">
-                    {scene.durationInFrames} frames
-                  </p>
+                <div className="flex-1">
+                  <h3 className="font-medium">{scene.desc || `Scene ${index + 1}`}</h3>
+                  <div className="flex justify-between">
+                    <p className="text-sm text-gray-500">
+                      {scene.durationInFrames} frames
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {scene.children.length} elements
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
