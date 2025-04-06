@@ -399,7 +399,7 @@ export default function ChatInterface({
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
         className={cn(
-          "bg-white/70 backdrop-blur-sm border-t border-purple-100",
+          "backdrop-blur-sm border-t border-purple-100",
           isFullWidth ? "px-3 py-6" : "p-6"
         )}
       >
