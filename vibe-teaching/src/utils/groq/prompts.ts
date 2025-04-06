@@ -8,12 +8,10 @@ VIDEO SPECIFICATIONS:
 - Safe Zone: Keep important content within 80% of screen width (1536px) and height (864px)
 
 IMPORTANT XML STRUCTURE RULES:
-1. The only XML tags that can contain children are <content> and <scene>. 
+1. The only XML tags that can contain children are <content>, <scene>, and <div>. 
 2. Other tags like <title>, <subtitle>, <heading>, <paragraph> can only contain text as children.
-3. The maximum nested depth is 3:
-   - First layer: <content>
-   - Second layer: <scene> elements
-   - Third layer: individual elements (<title>, <subtitle>, etc.)
+3. A <div> cannot contain any <scene>, <scene> can only be in the second layer of the XML. 
+4. You cannot use any other tags from HTML like <span>, <h1>, <h2>, <p>, <ul>, <ol>, <li> etc. If you need a list, please use <paragraph> with a dash for each item.
 
 AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
 1. <content> - Root element (required)
@@ -107,6 +105,11 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
    - durationInFrames: number
    No styling needed
 
+10. <div> - Custom container element, works the exact same way as a div in HTML where you can add any TailwindCSS classes you want to style the container.
+    Required attributes:
+    - class: string (Tailwind classes for custom containers
+    - children: array of elements (title, subtitle, heading, paragraph, image, video, audio, or div for nesting)
+
 LAYOUT GUIDELINES FOR 1920x1080:
 1. Content Positioning:
    - Center Zone: Primary content (1536x864)
@@ -140,9 +143,17 @@ Example Structure with 1080p Styling:
 		<title class="text-5xl font-extrabold mb-4" durationInFrames="150">
 			Learning Web Development
 		</title>
-		<paragraph class="text-xl font-medium opacity-90" durationInFrames="150"
-			>A comprehensive guide for beginners</paragraph
-		>
+		<div>
+			<paragraph class="text-xl font-medium opacity-90" durationInFrames="150">
+				A comprehensive guide for beginners
+			</paragraph>
+			<paragraph class="text-xl font-medium opacity-90" durationInFrames="150">
+				Explore HTML, CSS, and JavaScript
+			</paragraph>
+			<paragraph class="text-xl font-medium opacity-90" durationInFrames="150">
+				Start your journey into building websites from scratch.
+			</paragraph>
+		</div>
 	</scene>
 
 	<scene
@@ -153,12 +164,17 @@ Example Structure with 1080p Styling:
 		<heading
 			class="text-3xl font-bold mb-2 border-b-2 border-blue-500 pb-2"
 			durationInFrames="240"
-			>HTML Fundamentals</heading
-		>
-		<paragraph class="text-lg leading-relaxed" durationInFrames="240">
-			HTML (HyperText Markup Language) is the standard markup language for
-			documents designed to be displayed in a web browser.
-		</paragraph>
+		>HTML Fundamentals</heading>
+		<div>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="240">
+				HTML (HyperText Markup Language) is the standard markup language for
+				documents designed to be displayed in a web browser.
+			</paragraph>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="240">
+				HTML elements form the building blocks of all websites. Learn how to
+				use tags to structure your content.
+			</paragraph>
+		</div>
 		<image
 			class="w-full max-w-xl mx-auto rounded-lg shadow-lg"
 			durationInFrames="180"
@@ -174,16 +190,20 @@ Example Structure with 1080p Styling:
 		<heading
 			class="text-3xl font-bold mb-2 border-b-2 border-pink-500 pb-2"
 			durationInFrames="210"
-			>Styling with CSS</heading
-		>
-		<paragraph class="text-lg leading-relaxed" durationInFrames="210">
-			CSS (Cascading Style Sheets) is used to style and layout web pages — for
-			example, to alter the font, color, size, and spacing of your content.
-		</paragraph>
-		<paragraph class="text-lg leading-relaxed" durationInFrames="180">
-			It allows you to adapt the presentation to different types of devices,
-			such as large screens, small screens, or printers.
-		</paragraph>
+		>Styling with CSS</heading>
+		<div>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="210">
+				CSS (Cascading Style Sheets) is used to style and layout web pages — for
+				example, to alter the font, color, size, and spacing of your content.
+			</paragraph>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="180">
+				It allows you to adapt the presentation to different types of devices,
+				such as large screens, small screens, or printers.
+			</paragraph>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="180">
+				CSS makes your content visually appealing and improves user experience.
+			</paragraph>
+		</div>
 	</scene>
 
 	<scene
@@ -194,16 +214,21 @@ Example Structure with 1080p Styling:
 		<heading
 			class="text-3xl font-bold mb-2 border-b-2 border-yellow-500 pb-2"
 			durationInFrames="300"
-			>Interactive Web with JavaScript</heading
-		>
-		<paragraph class="text-lg leading-relaxed" durationInFrames="300">
-			JavaScript is a programming language that allows you to implement complex
-			features on web pages.
-		</paragraph>
-		<paragraph class="text-lg leading-relaxed" durationInFrames="270">
-			Every time a web page does more than just sit there and display static
-			information, JavaScript is probably involved.
-		</paragraph>
+		>Interactive Web with JavaScript</heading>
+		<div>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="300">
+				JavaScript is a programming language that allows you to implement complex
+				features on web pages.
+			</paragraph>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="270">
+				Every time a web page does more than just sit there and display static
+				information, JavaScript is probably involved.
+			</paragraph>
+			<paragraph class="text-lg leading-relaxed" durationInFrames="270">
+				From dynamic content to real-time interaction, JavaScript makes websites
+				come alive.
+			</paragraph>
+		</div>
 		<image
 			class="w-full max-w-xl mx-auto rounded-lg shadow-lg"
 			durationInFrames="240"
@@ -219,9 +244,15 @@ Example Structure with 1080p Styling:
 		<title class="text-4xl font-bold mb-4" durationInFrames="180">
 			Start Your Coding Journey Today!
 		</title>
-		<paragraph class="text-lg opacity-90" durationInFrames="180">
-			Visit our website at example.com for more tutorials
-		</paragraph>
+		<div>
+			<paragraph class="text-lg opacity-90" durationInFrames="180">
+				Visit our website at example.com for more tutorials
+			</paragraph>
+			<paragraph class="text-lg opacity-90" durationInFrames="180">
+				Continue learning and building real-world projects to strengthen your
+				skills.
+			</paragraph>
+		</div>
 	</scene>
 </content>
 \`\`\`
@@ -244,6 +275,8 @@ Remember:
 - Keep important content within safe zones
 - Use appropriate text sizes for 1080p resolution
 - Ensure readability at intended viewing distance
+- Use Div to group elements together
+- Add as many content in each scene as possible
 - Position elements according to layout guidelines
 - Include responsive design considerations
 - Use consistent spacing and alignment
