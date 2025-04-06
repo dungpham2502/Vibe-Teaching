@@ -33,11 +33,58 @@ interface JsonContent {
 			subtitle?: SceneElement;
 			heading?: SceneElement;
 			paragraph?: SceneElement;
+			image?: SceneElement;
 		}>;
 	};
 }
 
-export function convertJsonToRemotionTypes(jsonData: JsonContent): Scene[] {
+
+async function processImageWithPexels(src: string): Promise<string> {
+	// Check if the path matches the pattern "/assets/images/keyword.png"
+	const keywordMatch = src.match(/\/assets\/images\/([^\/\s]+)\.png$/);
+	
+	if (!keywordMatch || !keywordMatch[1]) {
+		return src; // Return original source if not matching the pattern
+	}
+	
+	const keyword = keywordMatch[1];
+	
+	try {
+		// Call Pexels API to get a random image by keyword
+		const pexelsApiKey = process.env.PEXELS_API_KEY;
+		
+		if (!pexelsApiKey) {
+			console.error("Pexels API key not found in environment variables");
+			return src;
+		}
+		
+		const response = await fetch(
+			`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&page=${Math.floor(Math.random() * 10) + 1}`,
+			{
+				headers: {
+					Authorization: `${pexelsApiKey}`
+				}
+			}
+		);
+		
+		if (!response.ok) {
+			console.error(`Pexels API error: ${response.statusText}`);
+			return src;
+		}
+		
+		const data = await response.json();
+		
+		if (data.photos && data.photos.length > 0) {
+			return data.photos[0].src.large;
+		}
+	} catch (error) {
+		console.error(`Error processing image with keyword "${keyword}":`, error);
+	}
+	
+	return src; // Return the original source if any error occurs
+}
+
+export async function convertJsonToRemotionTypes(jsonData: JsonContent): Promise<Scene[]> {
 	if (!jsonData) {
 		console.error("Invalid JSON: Input data is null or undefined");
 		return [];
@@ -89,7 +136,20 @@ export function convertJsonToRemotionTypes(jsonData: JsonContent): Scene[] {
 				text: sceneObj.paragraph._,
 			} as Paragraph);
 		}
-
+		if (sceneObj.image && sceneObj.image.$ !== undefined) {
+			// Get the original src from the $ property (attributes) instead of _ (content)
+			const originalSrc = sceneObj.image.$.src || "";
+			
+			// Process the image with Pexels API if it matches the pattern
+			const processedSrc = await processImageWithPexels(originalSrc);
+			
+			children.push({
+				type: "image",
+				class: sceneObj.image.$ ? sceneObj.image.$.class || "" : "",
+				durationInFrames: parseInt(sceneObj.image.$?.durationInFrames || "150", 10),
+				src: processedSrc,
+			} as Image);
+		}
 		scenes.push({
 			type: "scene",
 			id: uuidv4(),
