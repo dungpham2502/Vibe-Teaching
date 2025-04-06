@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
+import { v4 } from "uuid";
 
 export type MessageType = "user" | "system";
 
@@ -23,16 +24,19 @@ export function useChat({
 	const [messages, setMessages] = useState<Message[]>(initialMessages);
 	const [isStreaming, setIsStreaming] = useState(false);
 
-	const { setScenes } = useScenesStore();
+	const { setScenes, logState } = useScenesStore();
 
-	const getAIResponse = async (userMessage: string) => {
+	const getAIResponse = async (messagesHistory: Message[]) => {
 		try {
 			const response = await fetch("/api/chat", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ prompt: userMessage }),
+				body: JSON.stringify({ 
+					messages: messagesHistory,
+					prompt: messagesHistory[messagesHistory.length - 1].content
+				}),
 			});
 
 			if (!response.ok) {
@@ -42,6 +46,7 @@ export function useChat({
 			const data = await response.json();
 			console.log(data.jsonContent);
 			setScenes(data.jsonContent || []);
+			logState();
 			return (
 				data.content ||
 				"I'm sorry, I couldn't process your request at the moment."
@@ -54,43 +59,17 @@ export function useChat({
 
 	const streamResponse = async (text: string) => {
 		setIsStreaming(true);
-
-		// Split text into words
-		const words = text.split(" ");
-		let currentContent = "";
-
-		// Determine appropriate chunk size and delay based on content length
-		// For XML content, use larger chunks but keep streaming visible
-		const isLongContent = text.length > 1000;
-		const chunkSize = isLongContent ? 10 : 2;
-		const delay = isLongContent ? 20 : 40;
-
+		
 		try {
-			// Stream the content in chunks
-			for (let i = 0; i < words.length; i += chunkSize) {
-				const chunk = words.slice(i, i + chunkSize).join(" ");
-				currentContent += chunk + " ";
-
-				setMessages((prev) =>
-					prev.map((msg, idx) =>
-						idx === prev.length - 1
-							? { ...msg, content: currentContent.trim() }
-							: msg
-					)
-				);
-
-				// Use a proper delay to ensure UI updates
-				await new Promise((resolve) => setTimeout(resolve, delay));
-			}
-		} catch (error) {
-			console.error("Error streaming response:", error);
-		} finally {
-			// Ensure final content is set and streaming state is properly turned off
+			// Immediately set the full message content without streaming
 			setMessages((prev) =>
 				prev.map((msg, idx) =>
 					idx === prev.length - 1 ? { ...msg, content: text.trim() } : msg
 				)
 			);
+		} catch (error) {
+			console.error("Error setting response:", error);
+		} finally {
 			setIsStreaming(false);
 		}
 	};
@@ -100,28 +79,32 @@ export function useChat({
 			// Call onSendMessage if provided
 			onSendMessage?.(message);
 
-			// Add user message
-			setMessages((prev) => [
-				...prev,
+			// Add user message to messages state
+			const updatedMessages: Message[] = [
+				...messages,
 				{
-					id: `user-${Date.now()}`,
+					id: v4(),
 					content: message,
-					type: "user",
+					type: "user" as MessageType,
 				},
-			]);
+			];
+			
+			setMessages(updatedMessages);
 
 			// Add empty system message that will be streamed
-			setMessages((prev) => [
-				...prev,
+			const withEmptySystemMessage: Message[] = [
+				...updatedMessages,
 				{
-					id: `system-${Date.now()}`,
+					id: v4(),
 					content: "",
-					type: "system",
+					type: "system" as MessageType,
 				},
-			]);
+			];
+			
+			setMessages(withEmptySystemMessage);
 
-			// Get and stream AI response
-			const response = await getAIResponse(message);
+			// Get and stream AI response with complete message history
+			const response = await getAIResponse(withEmptySystemMessage);
 			onReceiveMessage?.(response);
 			await streamResponse(response);
 		}
