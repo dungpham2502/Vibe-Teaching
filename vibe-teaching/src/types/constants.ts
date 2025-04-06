@@ -1,4 +1,20 @@
 import { Scene } from "./remotion-types";
+import { 
+	makeTransform, 
+	scale, 
+	translateY, 
+	rotate,
+	translate,
+	translateX,
+	translateZ,
+	scale3d,
+	perspective,
+	rotateX,
+	rotateY,
+	skew,
+	interpolateStyles 
+  } from "@remotion/animation-utils";
+
 
 export const sampleRemotionXml: string = `
 <content>
@@ -159,3 +175,122 @@ export const sampleRemotionXml: string = `
 // 		],
 // 	},
 // ];
+
+export const animationProfiles = [
+  {
+    name: "calm",
+    styles: (progress: number) => interpolateStyles(
+    progress,
+    [0, 0.1, 0.3, 0.7, 1],
+    [
+      { 
+      opacity: 0.6, 
+      transform: makeTransform([scale(0.95), translateY(5), rotate(0.2)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale(1.02), translateY(-2), rotate(0)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale(1), translateY(0), rotate(0.1)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale(1.01), translateY(-1), rotate(0)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale(1), translateY(0), rotate(0)]) 
+      }
+    ]
+    )
+  },
+  {
+    name: "moderate",
+    styles: (progress: number) => interpolateStyles(
+    progress,
+    [0, 0.1, 0.3, 0.7, 1],
+    [
+      { 
+      opacity: 0.5, 
+      transform: makeTransform([translateX(-10), scale(0.92), rotateY(5)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([translateX(5), scale(1.04), rotateY(-2)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([translateX(0), scale(1), rotateY(0)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([translateX(3), scale(1.02), rotateY(1)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([translateX(0), scale(1), rotateY(0)]) 
+      }
+    ]
+    )
+  },
+  {
+    name: "energetic",
+    styles: (progress: number) => interpolateStyles(
+    progress,
+    [0, 0.1, 0.3, 0.7, 1],
+    [
+      { 
+      opacity: 0.4, 
+      transform: makeTransform([perspective(800), translateZ(-50), rotateX(10)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([perspective(800), translateZ(30), rotateX(-5)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([perspective(800), translateZ(0), rotateX(0)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([perspective(800), translateZ(20), rotateX(3)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([perspective(800), translateZ(0), rotateX(0)]) 
+      }
+    ]
+    )
+  },
+  {
+    name: "explosive",
+    styles: (progress: number) => interpolateStyles(
+    progress,
+    [0, 0.1, 0.3, 0.7, 1],
+    [
+      { 
+      opacity: 0.3, 
+      transform: makeTransform([scale3d(0.7, 0.7, 1), translate(-30, 20), skew(5)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale3d(1.2, 1.1, 1), translate(15, -15), skew(-3)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale3d(1.05, 1.05, 1), translate(0, 0), skew(0)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale3d(1.1, 1.05, 1), translate(10, -5), skew(2)]) 
+      },
+      { 
+      opacity: 1, 
+      transform: makeTransform([scale3d(1, 1, 1), translate(0, 0), skew(0)]) 
+      }
+    ]
+    )
+  }
+  ];
