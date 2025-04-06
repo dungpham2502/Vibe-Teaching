@@ -26,13 +26,13 @@ const WelcomeScreen = () => {
 				<div className="mb-8 relative h-80 w-full animate-fadeIn">
 					<Image 
 						src="/welcome-illustration.svg" 
-						alt="Welcome to Vibe Teaching"
+						alt="Welcome to VibeSlide"
 						fill
 						className="object-contain"
 						priority
 					/>
 				</div>
-				<h1 className="text-3xl font-bold mb-4 text-gray-800 animate-slideUp">Welcome to Vibe Teaching</h1>
+				<h1 className="text-3xl font-bold mb-4 text-gray-800 animate-slideUp">Welcome to VibeSlide</h1>
 				<p className="text-gray-600 mb-4 text-lg max-w-lg mx-auto animate-slideUp animation-delay-100">
 					Start by describing the lesson you want to create. Our AI will generate
 					video lessons based on your conversation.
