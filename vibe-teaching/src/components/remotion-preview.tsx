@@ -1,8 +1,8 @@
-import { Player } from "@remotion/player";
+import { Player, PlayerRef } from "@remotion/player";
 import { RemotionObject, Scene } from "@/types/remotion-types";
 import { AbsoluteFill, Series, useCurrentFrame } from "remotion";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
 
 interface RemotionPreviewProps {
@@ -11,20 +11,19 @@ interface RemotionPreviewProps {
 }
 
 export function RemotionPreview({ scenes, selectedSceneId }: RemotionPreviewProps) {
+  const { debug, setCurrentFrame: setGlobalCurrentFrame } = useScenesStore();
   const [currentFrame, setCurrentFrame] = useState(0);
+  const playerRef = useRef<PlayerRef>(null);
   
-  // Approach 1: Filter scenes to show only the selected scene (if any)
-  const scenesToRender = selectedSceneId 
-    ? scenes.filter(scene => scene.class === selectedSceneId) 
-    : scenes;
+  // Always render all scenes
+  const scenesToRender = scenes;
   
-  // Approach 2: Alternative - Keep all scenes but start at the selected scene's frame
-  // This might work better for some use cases as it preserves the entire sequence
+  // Calculate the start frame based on selected scene
   let startFrame = 0;
   if (selectedSceneId && scenes.length > 0) {
     let frameCount = 0;
     for (const scene of scenes) {
-      if (scene.class === selectedSceneId) {
+      if (scene.id === selectedSceneId) {
         startFrame = frameCount;
         break;
       }
@@ -32,36 +31,53 @@ export function RemotionPreview({ scenes, selectedSceneId }: RemotionPreviewProp
     }
   }
   
-  // Debug: Log the selected scene and start frame
-  useEffect(() => {
-    console.log('Using scene filter approach:', !!selectedSceneId);
-    console.log('Selected scene ID:', selectedSceneId);
-    console.log('Scenes to render:', scenesToRender.length);
-    console.log('Start frame for selected scene:', startFrame);
-    
-    // Check what text content we have in the filtered scenes
-    scenesToRender.forEach((scene, index) => {
-      console.log(`Scene ${index} (${scene.desc}):`, {
-        childCount: scene.children.length,
-        textItems: scene.children.filter(child => 'text' in child).length,
-        firstTextItem: scene.children.find(child => 'text' in child)?.text || 'none'
-      });
-    });
-  }, [selectedSceneId, scenesToRender, startFrame]);
-  
-  // Calculate total duration of scenes to render
+  // Calculate total duration of scenes
   const totalDuration = scenesToRender.reduce((sum, scene) => sum + scene.durationInFrames, 0) || 3600;
   
-  // Ensure initialFrame is always within valid range
-  const safeInitialFrame = Math.min(
-    selectedSceneId ? startFrame : currentFrame, 
-    Math.max(0, totalDuration - 1)
-  );
+  // Important: Use this effect to seek to the correct frame when selectedSceneId changes
+  useEffect(() => {
+    if (playerRef.current && selectedSceneId) {
+      if (debug) {
+        console.log('Seeking to frame:', startFrame);
+      }
+      
+      // Pause first to make sure the seeking works correctly
+      playerRef.current.pause();
+      
+      // This is crucial - use setTimeout to ensure the seek happens after the player has initialized
+      setTimeout(() => {
+        if (playerRef.current) {
+          playerRef.current.seekTo(startFrame);
+          setCurrentFrame(startFrame);
+          setGlobalCurrentFrame(startFrame);
+        }
+      }, 50);
+    }
+  }, [selectedSceneId, startFrame, debug, setGlobalCurrentFrame]);
+  
+  // Debug: Log the selected scene and start frame
+  useEffect(() => {
+    if (debug) {
+      console.log('Selected scene ID:', selectedSceneId);
+      console.log('Total scenes to render:', scenesToRender.length);
+      console.log('Start frame for selected scene:', startFrame);
+      
+      // Check what text content we have in the scenes
+      scenesToRender.forEach((scene, index) => {
+        console.log(`Scene ${index} (${scene.desc}):`, {
+          childCount: scene.children.length,
+          textItems: scene.children.filter(child => 'text' in child).length,
+          firstTextItem: scene.children.find(child => 'text' in child)?.text || 'none'
+        });
+      });
+    }
+  }, [selectedSceneId, scenesToRender, startFrame, debug]);
   
   return (
     <div className="bg-white w-full">
       <div className="w-full aspect-video flex flex-col justify-center items-center border-red border-[1px] rounded">
         <Player
+          ref={playerRef}
           fps={30}
           component={VideoComponent}
           inputProps={{ scenes: scenesToRender }}
@@ -73,7 +89,7 @@ export function RemotionPreview({ scenes, selectedSceneId }: RemotionPreviewProp
             width: "100%",
           }}
           controls
-          initialFrame={safeInitialFrame}
+          initialFrame={0}
           acknowledgeRemotionLicense
         />
       </div>
@@ -106,13 +122,15 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 	// Update the global store with the current frame
 	useEffect(() => {
 		setCurrentFrame(frame);
-		console.log(`Current frame: ${frame}, Scene: ${currentSceneIndex}, Relative frame: ${relativeFrame}`);
-	}, [frame, currentSceneIndex, relativeFrame, setCurrentFrame]);
+		if (debug) {
+			console.log(`Current frame: ${frame}, Scene: ${currentSceneIndex}, Relative frame: ${relativeFrame}`);
+		}
+	}, [frame, currentSceneIndex, relativeFrame, setCurrentFrame, debug]);
 	
 	return (
 		<Series>
 			{scenes.map((scene: Scene, sceneIndex: number) => (
-				<Series.Sequence key={scene.id || `scene-${scene.desc}-${Math.random()}`} durationInFrames={scene.durationInFrames}>
+				<Series.Sequence key={scene.id || `scene-${scene.desc}-${sceneIndex}`} durationInFrames={scene.durationInFrames}>
 					<AbsoluteFill className={cn("flex flex-col items-center justify-center p-20", scene.class)}>
 						{/* Visual debug overlay */}
 						{debug && (
@@ -120,6 +138,9 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 								<div>Scene: {sceneIndex} - {scene.desc}</div>
 								<div>Children: {scene.children.length}</div>
 								<div>Frame: {frame} (Relative: {relativeFrame})</div>
+								<div className={sceneIndex === currentSceneIndex ? "text-green-400" : ""}>
+									{sceneIndex === currentSceneIndex ? "► ACTIVE" : ""}
+								</div>
 							</div>
 						)}
 					
@@ -130,7 +151,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 									case "title":
 										return (
 											<h1 
-												key={item.id || `title-${Math.random()}`} 
+												key={item.id || `title-${itemIndex}`} 
 												className={cn(
 													"text-9xl font-bold mb-8 text-center", 
 													item.class
@@ -143,7 +164,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 									case "subtitle":
 										return (
 											<h2 
-												key={item.id || `subtitle-${Math.random()}`} 
+												key={item.id || `subtitle-${itemIndex}`} 
 												className={cn(
 													"text-6xl font-semibold my-4 text-center", 
 													item.class
@@ -156,7 +177,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 									case "heading":
 										return (
 											<h3 
-												key={item.id || `heading-${Math.random()}`} 
+												key={item.id || `heading-${itemIndex}`} 
 												className={cn(
 													"text-7xl font-medium my-6 text-center", 
 													item.class
@@ -169,7 +190,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 									case "paragraph":
 										return (
 											<p 
-												key={item.id || `paragraph-${Math.random()}`} 
+												key={item.id || `paragraph-${itemIndex}`} 
 												className={cn(
 													"text-4xl my-4 text-center max-w-4xl",
 													item.class
@@ -182,7 +203,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 									case "image":
 										return (
 											<div 
-												key={item.id || `image-${Math.random()}`} 
+												key={item.id || `image-${itemIndex}`} 
 												className={cn(
 													"my-6 flex justify-center items-center",
 													item.class
@@ -198,7 +219,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 										);
 									default:
 										return (
-											<div key={item.id || `item-${Math.random()}`}>
+											<div key={item.id || `item-${itemIndex}`}>
 												Item not supported
 												{debug && <span className="text-xs text-red-500"> (unknown: {item.type})</span>}
 											</div>

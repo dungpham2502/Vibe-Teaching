@@ -38,7 +38,7 @@ export const useScenesStore = create<ScenesState>((set, get) => ({
 		const state = get();
 		if (state.debug) console.log("Removing scene with ID:", id);
 		set((state) => ({
-			scenes: state.scenes.filter((scene) => scene.class !== id),
+			scenes: state.scenes.filter((scene) => scene.id !== id),
 			// If the selected scene is removed, deselect it
 			selectedSceneId:
 				state.selectedSceneId === id ? null : state.selectedSceneId,
