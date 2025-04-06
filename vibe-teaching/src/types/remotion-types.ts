@@ -54,6 +54,13 @@ export type Audio = {
 	durationInFrames: number;
 };
 
+export type Div = {
+    type: "div";
+    id: string;
+    class: string;
+    children: RemotionObject[];
+}
+
 export type RemotionObject =
 	| Title
 	| SubTitle
@@ -61,4 +68,5 @@ export type RemotionObject =
 	| Paragraph
 	| Image
 	| Video
-	| Audio;
+	| Audio
+    | Div;
