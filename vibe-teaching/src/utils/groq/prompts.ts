@@ -7,11 +7,20 @@ VIDEO SPECIFICATIONS:
 - Frame Rate: 30 fps
 - Safe Zone: Keep important content within 80% of screen width (1536px) and height (864px)
 
+IMPORTANT XML STRUCTURE RULES:
+1. The only XML tags that can contain children are <content> and <scene>. 
+2. Other tags like <title>, <subtitle>, <heading>, <paragraph> can only contain text as children.
+3. The maximum nested depth is 3:
+   - First layer: <content>
+   - Second layer: <scene> elements
+   - Third layer: individual elements (<title>, <subtitle>, etc.)
+
 AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
 1. <content> - Root element (required)
    No styling needed
 
 2. <scene> - Container for a video section (1920x1080 canvas)
+   
    Required attributes:
    - class: string (Tailwind classes for scene layout)
      Recommended styles: 
@@ -21,6 +30,8 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
      - Background: "bg-[color] bg-opacity-[value]"
    - durationInFrames: number
    - desc: string
+   - children: array of elements (title, subtitle, heading, paragraph, image, video, audio)
+
 
 3. <title> - Main title element
    Required attributes:
