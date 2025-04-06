@@ -230,14 +230,27 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
 
               {scene.children.map((item: RemotionObject, itemIndex) => {
                 // For debugging: Add visual indicator for each child element
-                const ItemComponent = () => {
+                const ItemComponent = ({ item }: { item: RemotionObject }) => {
                   switch (item.type) {
+                    case "div":
+                      return (
+                        <div
+                          key={item.id || `div-${itemIndex}`}
+                          className={cn(
+                            item.class
+                          )}
+                        >
+                          {item.children.map((divItem: RemotionObject) => (
+                            <ItemComponent item={divItem} />
+                          ))}
+                        </div>
+                      )
                     case "title":
                       return (
                         <h1
                           key={item.id || `title-${itemIndex}`}
                           className={cn(
-                            "text-9xl font-bold mb-8 text-center",
+                            "!text-7xl font-bold mb-8 text-center",
                             item.class
                           )}
                         >
@@ -255,7 +268,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h2
                           key={item.id || `subtitle-${itemIndex}`}
                           className={cn(
-                            "text-6xl font-semibold my-4 text-center",
+                            "!text-3xl font-semibold my-4 text-center",
                             item.class
                           )}
                         >
@@ -273,7 +286,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h3
                           key={item.id || `heading-${itemIndex}`}
                           className={cn(
-                            "text-7xl font-medium my-6 text-center",
+                            "!text-6xl font-medium my-6 text-center",
                             item.class
                           )}
                         >
@@ -291,7 +304,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <p
                           key={item.id || `paragraph-${itemIndex}`}
                           className={cn(
-                            "text-4xl my-4 text-center max-w-4xl",
+                            "!text-3xl my-4 text-center max-w-4xl",
                             item.class
                           )}
                         >
@@ -347,7 +360,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         Item {itemIndex}: {item.type}
                       </div>
                     )}
-                    <ItemComponent />
+                    <ItemComponent item={item} />
                   </div>
                 );
               })}
