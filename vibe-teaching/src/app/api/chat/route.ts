@@ -4,7 +4,7 @@ import { systemPrompt, userPrompt } from "@/utils/groq/prompts";
 import { convertJsonToRemotionTypes } from "@/lib/json-parser";
 import { convertXML } from "simple-xml-to-json";
 import { Scene } from "@/types/remotion-types";
-
+import { v4 as uuidV4 } from "uuid";
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY!,
 });
@@ -56,14 +56,14 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 			// Add unique key to scene
 			const sceneWithKey = {
 				...scene,
-				id: `scene-${sceneIndex}`,
+				id: uuidV4(),
 			};
 			
 			// Add unique keys to children
 			if (sceneWithKey.children && sceneWithKey.children.length > 0) {
-				sceneWithKey.children = sceneWithKey.children.map((child, childIndex) => ({
+				sceneWithKey.children = sceneWithKey.children.map((child) => ({
 					...child,
-					id: `${sceneWithKey.id}-child-${childIndex}`,
+					id: uuidV4(),
 				}));
 			}
 			
