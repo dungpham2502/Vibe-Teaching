@@ -26,28 +26,32 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 				durationInFrames: parseInt(sceneObj.title.$.durationInFrames, 10),
 				text: sceneObj.title._,
 			} as Title);
-		} else if (sceneObj.subtitle) {
+		}
+		if (sceneObj.subtitle) {
 			children.push({
 				type: "subtitle",
 				class: sceneObj.subtitle.$,
 				durationInFrames: parseInt(sceneObj.subtitle.$.durationInFrames, 10),
 				text: sceneObj.subtitle._,
 			} as SubTitle);
-		} else if (sceneObj.heading) {
+		}
+		if (sceneObj.heading) {
 			children.push({
 				type: "heading",
 				class: sceneObj.heading.$,
 				durationInFrames: parseInt(sceneObj.heading.$.durationInFrames, 10),
 				text: sceneObj.heading._,
 			} as Heading);
-		} else if (sceneObj.paragraph) {
+		}
+		if (sceneObj.paragraph) {
 			children.push({
 				type: "paragraph",
 				class: sceneObj.paragraph.$,
 				durationInFrames: parseInt(sceneObj.paragraph.$.durationInFrames, 10),
 				text: sceneObj.paragraph._,
 			} as Paragraph);
-		} else if (sceneObj.image) {
+		}
+		if (sceneObj.image) {
 			children.push({
 				type: "image",
 				class: sceneObj.image.$,
@@ -55,6 +59,7 @@ export function convertJsonToRemotionTypes(jsonData: any): Scene[] {
 				src: sceneObj.image._,
 			} as Image);
 		}
+
 		scenes.push({
 			type: "scene",
 			id: uuidv4(),
