@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ArrowUp, Video } from "lucide-react"
+import { ArrowUp, Video, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -20,6 +20,16 @@ const FormattedMessage = ({ content }: { content: string }) => {
   // Detect if content contains XML content patterns
   
   const hasXmlContent = content.includes("<content>") && content.includes("</content>");
+  
+  // If content is empty, show a loader
+  if (!content.trim()) {
+    return (
+      <div className="flex items-center">
+        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+        <span>Thinking...</span>
+      </div>
+    );
+  }
   
   // Sanitize content by removing triple backticks and XML code blocks
   const sanitizeContent = (text: string) => {

@@ -104,8 +104,8 @@ export function useChat({
             // Get and stream AI response with complete message history
             // We need to pass the updated messages array for correct API call
             const currentMessages = [...messages, 
-                { id: "", content: message, type: "user" },
-                { id: "", content: "", type: "system" }
+                { id: "", content: message, type: "user" as MessageType },
+                { id: "", content: "", type: "system" as MessageType }
             ];
             const response = await getAIResponse(currentMessages);
             onReceiveMessage?.(response);
