@@ -1,121 +1,121 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
-import { v4 } from "uuid";
+import { useMessageStore } from "@/store/useMessageStore";
 
 export type MessageType = "user" | "system";
 
 export interface Message {
-	id: string;
-	content: string;
-	type: MessageType;
+    id: string;
+    content: string;
+    type: MessageType;
 }
 
 interface UseChatProps {
-	onSendMessage?: (message: string) => void;
-	onReceiveMessage?: (message: string) => void;
-	initialMessages?: Message[];
+    onSendMessage?: (message: string) => void;
+    onReceiveMessage?: (message: string) => void;
+    initialMessages?: Message[];
 }
 
 export function useChat({
-	onSendMessage,
-	onReceiveMessage,
-	initialMessages = [],
+    onSendMessage,
+    onReceiveMessage,
+    initialMessages = [],
 }: UseChatProps) {
-	const [messages, setMessages] = useState<Message[]>(initialMessages);
-	useEffect(() => {
-		console.log("Messages updated:", messages);
-	}, [messages]);
-	const [isStreaming, setIsStreaming] = useState(false);
+    // Get everything we need from the message store
+    const { 
+        messages, 
+        isStreaming, 
+        setMessages, 
+        addMessage, 
+        updateLastMessage, 
+        setIsStreaming 
+    } = useMessageStore();
 
-	const { setScenes, logState } = useScenesStore();
+    // Get scene-related actions from the scenes store
+    const { setScenes, logState } = useScenesStore();
 
-	const getAIResponse = async (messagesHistory: Message[]) => {
-		try {
-			const response = await fetch("/api/chat", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ 
-					messages: messagesHistory,
-					prompt: messagesHistory[messagesHistory.length - 1].content
-				}),
-			});
+    // Initialize with initial messages if provided and store is empty
+    useEffect(() => {
+        if (initialMessages.length > 0 && messages.length === 0) {
+            setMessages(initialMessages);
+        }
+    }, [initialMessages, messages.length, setMessages]);
 
-			if (!response.ok) {
-				throw new Error("Failed to get AI response");
-			}
+    // Log when messages are updated (keeping existing logging)
+    useEffect(() => {
+        console.log("Messages updated:", messages);
+    }, [messages]);
 
-			const data = await response.json();
-			console.log(data.jsonContent);
-			setScenes(data.jsonContent || []);
-			logState();
-			return (
-				data.content ||
-				"I'm sorry, I couldn't process your request at the moment."
-			);
-		} catch (error) {
-			console.error("Error getting AI response:", error);
-			return "I'm sorry, I couldn't process your request at the moment.";
-		}
-	};
+    const getAIResponse = async (messagesHistory: Message[]) => {
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ 
+                    messages: messagesHistory,
+                    prompt: messagesHistory[messagesHistory.length - 1].content
+                }),
+            });
 
-	const streamResponse = async (text: string) => {
-		setIsStreaming(true);
-		
-		try {
-			// Immediately set the full message content without streaming
-			setMessages((prev) =>
-				prev.map((msg, idx) =>
-					idx === prev.length - 1 ? { ...msg, content: text.trim() } : msg
-				)
-			);
-		} catch (error) {
-			console.error("Error setting response:", error);
-		} finally {
-			setIsStreaming(false);
-		}
-	};
+            if (!response.ok) {
+                throw new Error("Failed to get AI response");
+            }
 
-	const sendMessage = async (message: string) => {
-		if (message.trim() && !isStreaming) {
-			// Call onSendMessage if provided
-			onSendMessage?.(message);
+            const data = await response.json();
+            console.log(data.jsonContent);
+            setScenes(data.jsonContent || []);
+            logState();
+            return (
+                data.content ||
+                "I'm sorry, I couldn't process your request at the moment."
+            );
+        } catch (error) {
+            console.error("Error getting AI response:", error);
+            return "I'm sorry, I couldn't process your request at the moment.";
+        }
+    };
 
-			// Add user message to messages state
-			const updatedMessages: Message[] = [
-				...messages,
-				{
-					id: v4(),
-					content: message,
-					type: "user" as MessageType,
-				},
-			];
-			
-			setMessages(updatedMessages);
+    const streamResponse = async (text: string) => {
+        setIsStreaming(true);
+        
+        try {
+            // Use store action instead of direct state manipulation
+            updateLastMessage(text.trim());
+        } catch (error) {
+            console.error("Error setting response:", error);
+        } finally {
+            setIsStreaming(false);
+        }
+    };
 
-			// Add empty system message that will be streamed
-			const withEmptySystemMessage: Message[] = [
-				...updatedMessages,
-				{
-					id: v4(),
-					content: "",
-					type: "system" as MessageType,
-				},
-			];
-			
-			setMessages(withEmptySystemMessage);
+    const sendMessage = async (message: string) => {
+        if (message.trim() && !isStreaming) {
+            // Call onSendMessage if provided
+            onSendMessage?.(message);
 
-			// Get and stream AI response with complete message history
-			const response = await getAIResponse(withEmptySystemMessage);
-			onReceiveMessage?.(response);
-			await streamResponse(response);
-		}
-	};
+            // Add user message using store action
+            addMessage(message, "user");
 
-	return {
-		messages,
-		isStreaming,
-		sendMessage,
-	};
+            // Add empty system message that will be streamed
+            addMessage("", "system");
+
+            // Get and stream AI response with complete message history
+            // We need to pass the updated messages array for correct API call
+            const currentMessages = [...messages, 
+                { id: "", content: message, type: "user" },
+                { id: "", content: "", type: "system" }
+            ];
+            const response = await getAIResponse(currentMessages);
+            onReceiveMessage?.(response);
+            await streamResponse(response);
+        }
+    };
+
+    return {
+        messages,
+        isStreaming,
+        sendMessage,
+    };
 }
