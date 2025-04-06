@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { systemPrompt, userPrompt } from "@/utils/groq/prompts";
-import { Scene } from "@/types/remotion-types";
+import { Scene, RemotionObject } from "@/types/remotion-types";
 import { convertJsonToRemotionTypes } from "@/lib/json-parser";
 import { v4 as uuidv4 } from "uuid";
 import xml2js from "xml2js";
@@ -10,6 +10,33 @@ import { Message } from "@/hooks/use-chat";
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY!,
 });
+
+/**
+ * Sanitizes XML content by escaping ampersands in URL attributes
+ * @param xmlContent The raw XML content
+ * @returns Sanitized XML with escaped ampersands in URLs
+ */
+function sanitizeXml(xmlContent: string): string {
+	if (!xmlContent) return "";
+	
+	
+	// Process each image tag separately to correctly handle multiple ampersands
+	const sanitized = xmlContent.replace(
+		/<image[^>]*src=["'](https?:\/\/[^"']+)["'][^>]*>/g,
+		(fullTag, url) => {
+			// Replace all unescaped ampersands in the URL with &amp;
+			// But don't double-escape if some are already escaped
+			const sanitizedUrl = url.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
+			// Replace the original URL with the sanitized one
+			const result = fullTag.replace(url, sanitizedUrl);
+
+			return result;
+		}
+	);
+	
+
+	return sanitized;
+}
 
 /**
  * Extracts XML content from a string
@@ -40,10 +67,12 @@ function extractXmlContent(text: string): string | null {
 function convertXML(inp: string): Record<string, any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	const parser = new xml2js.Parser({ explicitArray: false });
 
+	console.log("INPUT: ", inp);
 	// Example usage:
 	let res: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 	parser.parseString(inp, (err, result) => {
 		if (err) {
+			console.error("Error parsing XML:", err);
 			res = {};
 		} else {
 			res = result;
@@ -58,9 +87,8 @@ function convertXML(inp: string): Record<string, any> { // eslint-disable-line @
  * @param xmlContent The XML content to convert
  * @returns The converted JSON or null if conversion failed
  */
-function convertXmlToJson(xmlContent: string | null): Scene[] | null {
+async function convertXmlToJson(xmlContent: string | null): Promise<Scene[] | null> {
 	if (!xmlContent) return null;
-
 	try {
 		// Convert XML to intermediate JSON format
 		const intermediateJson = convertXML(xmlContent);
@@ -72,10 +100,10 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 		}
 
 		// Convert intermediate JSON to Remotion types
-		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
+		const remotionJson = await convertJsonToRemotionTypes(intermediateJson);
 
 		// Add unique keys to each scene and its children
-		return remotionJson.map((scene) => {
+		return remotionJson.map((scene: Scene) => {
 			// Add unique key to scene
 			const sceneWithKey = {
 				...scene,
@@ -86,7 +114,7 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 			// Add unique keys to children
 			if (sceneWithKey.children && sceneWithKey.children.length > 0) {
 				sceneWithKey.children = sceneWithKey.children.map(
-					(child) => ({
+					(child: RemotionObject) => ({
 						...child,
 						id: uuidv4(),
 					})
@@ -167,15 +195,19 @@ export async function POST(request: Request) {
 		// Extract XML content if present
 		const xmlContent = extractXmlContent(responseContent);
 
+		// Sanitize XML content to escape ampersands in URLs
+		const sanitizedXmlContent = xmlContent ? sanitizeXml(xmlContent) : xmlContent;
+		
 		// Convert XML to JSON if XML content is found
-		const jsonContent = convertXmlToJson(xmlContent);
+		// Image processing now happens in the convertJsonToRemotionTypes function
+		const jsonContent = await convertXmlToJson(sanitizedXmlContent);
 
-		// console.log("JSON: ", jsonContent);
-		// Return the full response, extracted XML, and the converted JSON
+				// Return the full response, extracted XML, and the converted JSON
+
 		return NextResponse.json(
 			{
 				content: responseContent,
-				xmlContent,
+				xmlContent: sanitizedXmlContent, // Use sanitized XML
 				jsonContent,
 			},
 			{ status: 200 }

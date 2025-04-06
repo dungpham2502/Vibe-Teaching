@@ -75,9 +75,6 @@ export default function Wrapper() {
 		}, 100); // Simulate 3 second delay for video generation
 	};
 
-	const handleReceiveMessage = (message: string) => {
-		console.log("Received message:", message);
-	};
 
 	const handleTimelineItemSelect = (item: TimelineItem) => {
 		setSelectedTimelineItem(item);
@@ -150,7 +147,6 @@ export default function Wrapper() {
 					>
 						<ChatInterface
 							onSendMessage={handleSendMessage}
-							onReceiveMessage={handleReceiveMessage}
 							initialMessages={sharedMessages}
 							onMessagesChange={handleMessageUpdate}
 						/>
@@ -165,7 +161,6 @@ export default function Wrapper() {
 					<div className="h-[280px]">
 						<ChatInterface
 							onSendMessage={handleSendMessage}
-							onReceiveMessage={handleReceiveMessage}
 							initialMessages={sharedMessages}
 							onMessagesChange={handleMessageUpdate}
 							isFullWidth={true}

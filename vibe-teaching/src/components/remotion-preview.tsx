@@ -1,6 +1,6 @@
 import { Player, PlayerRef } from "@remotion/player";
 import { RemotionObject, Scene } from "@/types/remotion-types";
-import { AbsoluteFill, Series, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Series, useCurrentFrame, interpolate, Img } from "remotion";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
@@ -313,7 +313,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                             item.class
                           )}
                         >
-                          <img
+                          <Img
                             src={item.src}
                             alt=""
                             className="max-w-2xl max-h-[40vh] object-contain"

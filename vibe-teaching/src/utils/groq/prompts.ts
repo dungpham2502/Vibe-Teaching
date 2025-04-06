@@ -91,6 +91,7 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
      - Shadow: "shadow-lg"
    - durationInFrames: number
    - src: string
+     IMPORTANT: All image src attributes must follow the format "/assets/images/keyword.png" where keyword describes the image content
 
 8. <video> - Video element
    Required attributes:
