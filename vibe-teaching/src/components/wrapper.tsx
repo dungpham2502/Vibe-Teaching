@@ -8,14 +8,42 @@ import Preview from "./preview/preview";
 import { Button } from "@/components/ui/button";
 import { Message } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // Define TimelineItem interface for type safety
 interface TimelineItem {
 	id: string;
 	title: string;
-	videoUrl: string;
+	videoUrl?: string;
 	thumbnail?: string;
 }
+
+// Welcome screen component for empty state
+const WelcomeScreen = () => {
+	return (
+		<div className="flex flex-col items-center justify-center w-full h-full text-center px-6 py-12 bg-gray-50">
+			<div className="max-w-2xl">
+				<div className="mb-8 relative h-80 w-full animate-fadeIn">
+					<Image 
+						src="/welcome-illustration.svg" 
+						alt="Welcome to Vibe Teaching"
+						fill
+						className="object-contain"
+						priority
+					/>
+				</div>
+				<h1 className="text-3xl font-bold mb-4 text-gray-800 animate-slideUp">Welcome to Vibe Teaching</h1>
+				<p className="text-gray-600 mb-4 text-lg max-w-lg mx-auto animate-slideUp animation-delay-100">
+					Start by describing the lesson you want to create. Our AI will generate
+					video lessons based on your conversation.
+				</p>
+				<div className="text-sm text-gray-500 animate-slideUp animation-delay-200">
+					Type your first message below to begin
+				</div>
+			</div>
+		</div>
+	);
+};
 
 export default function Wrapper() {
 	// State to track if we have content to display
@@ -44,7 +72,7 @@ export default function Wrapper() {
 		setTimeout(() => {
 			setIsGenerating(false);
 			setHasContent(true);
-		}, 3000); // Simulate 3 second delay for video generation
+		}, 100); // Simulate 3 second delay for video generation
 	};
 
 	const handleReceiveMessage = (message: string) => {
@@ -63,7 +91,7 @@ export default function Wrapper() {
 	return (
 		<div
 			className={cn(
-				"flex w-full h-screen transition-all duration-500",
+				"flex w-full h-screen transition-all duration-500 bg-gray-50",
 				isViewMode && hasContent ? "bg-gray-900/80" : ""
 			)}
 		>
@@ -129,15 +157,20 @@ export default function Wrapper() {
 					</div>
 				</>
 			) : (
-				// Full-width chat interface when no content
-				<div className="w-full transition-all duration-500">
-					<ChatInterface
-						onSendMessage={handleSendMessage}
-						onReceiveMessage={handleReceiveMessage}
-						initialMessages={sharedMessages}
-						onMessagesChange={handleMessageUpdate}
-						isFullWidth={true}
-					/>
+				// Welcome screen with chat interface when no content
+				<div className="w-full flex flex-col h-full transition-all duration-500">
+					<div className="flex-1 min-h-0">
+						<WelcomeScreen />
+					</div>
+					<div className="h-[280px]">
+						<ChatInterface
+							onSendMessage={handleSendMessage}
+							onReceiveMessage={handleReceiveMessage}
+							initialMessages={sharedMessages}
+							onMessagesChange={handleMessageUpdate}
+							isFullWidth={true}
+						/>
+					</div>
 				</div>
 			)}
 		</div>

@@ -17,67 +17,47 @@ interface ChatInterfaceProps {
 
 // Component to format message content, replacing XML with video icon
 const FormattedMessage = ({ content }: { content: string }) => {
-  // Check for XML in code blocks with ```xml tags
-  const codeBlockRegex = /```(?:xml)?\s*(<content>[\s\S]*?<\/content>)\s*```/;
-  const codeBlockMatch = content.match(codeBlockRegex);
+  // Detect if content contains XML content patterns
   
-  // Check for direct XML content without code blocks
-  const directXmlRegex = /(<content>[\s\S]*?<\/content>)/;
+  const hasXmlContent = content.includes("<content>") && content.includes("</content>");
   
-  // If XML is found in code blocks
-  if (codeBlockMatch) {
-    // Split the content into parts
-    const beforeXml = content.substring(0, codeBlockMatch.index);
-    const afterXml = content.substring(codeBlockMatch.index! + codeBlockMatch[0].length);
+  // Sanitize content by removing triple backticks and XML code blocks
+  const sanitizeContent = (text: string) => {
+    // Remove ```xml blocks and their content
+    let sanitized = text.replace(/```(?:xml)?\s*(?:<content>[\s\S]*?<\/content>)\s*```/g, "");
     
-    // Clean up the text: remove phrases like "Here is the converted XML code:" or similar
-    const cleanedBeforeXml = beforeXml.replace(/Here is (?:the |a )(?:converted |)XML(?:| code| script)(?::|\.)\s*/gi, "");
+    // Remove direct XML tags and their content
+    sanitized = sanitized.replace(/<content>[\s\S]*?<\/content>/g, "");
     
-    // Clean up the after text, removing any explanations about the XML
-    const cleanedAfterXml = afterXml.replace(/^I applied the provided guidelines(?:.|\n)*$/m, "").trim();
+    // Remove other code blocks with triple backticks
+    sanitized = sanitized.replace(/```[\s\S]*?```/g, "");
     
-    return (
-      <>
-        {cleanedBeforeXml}
+    // Remove phrases like "Here is the converted XML code:" or similar
+    sanitized = sanitized.replace(/Here is (?:the |a )(?:converted |)XML(?:| code| script)(?::|\.)\s*/gi, "");
+    
+    // Remove explanations about the XML
+    sanitized = sanitized.replace(/I applied the provided guidelines(?:.|\n)*$/m, "");
+    
+    // Clean up extra whitespace
+    sanitized = sanitized.replace(/\n{3,}/g, "\n\n").trim();
+    
+    return sanitized;
+  };
+  
+  // Sanitize the content
+  const sanitizedContent = sanitizeContent(content);
+  
+  return (
+    <>
+      {sanitizedContent}
+      {hasXmlContent && (
         <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
           <Video className="w-8 h-8 text-blue-500 mr-3" />
           <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
         </div>
-        {cleanedAfterXml && (
-          <div className="mt-2">{cleanedAfterXml}</div>
-        )}
-      </>
-    );
-  }
-  
-  // If direct XML without backticks is found
-  const directMatch = content.match(directXmlRegex);
-  if (directMatch) {
-    const beforeXml = content.substring(0, directMatch.index);
-    const afterXml = content.substring(directMatch.index! + directMatch[0].length);
-    
-    // Clean up the text: remove phrases like "Here is the converted XML code:" or similar
-    const cleanedBeforeXml = beforeXml.replace(/Here is (?:the |a )(?:converted |)XML(?:| code| script)(?::|\.)\s*/gi, "");
-    
-    // Clean up the after text, removing any explanations about the XML
-    const cleanedAfterXml = afterXml.replace(/^I applied the provided guidelines(?:.|\n)*$/m, "").trim();
-    
-    return (
-      <>
-        {cleanedBeforeXml}
-        <div className="flex items-center justify-center my-3 bg-blue-50 p-4 rounded-lg">
-          <Video className="w-8 h-8 text-blue-500 mr-3" />
-          <span className="text-sm text-blue-700 font-medium">Video lesson created</span>
-        </div>
-        {cleanedAfterXml && (
-          <div className="mt-2">{cleanedAfterXml}</div>
-        )}
-      </>
-    );
-  }
-  
-  // If no XML found, return content as is
-  return <>{content}</>;
+      )}
+    </>
+  );
 }
 
 export default function ChatInterface({
@@ -186,7 +166,7 @@ export default function ChatInterface({
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder={isStreaming ? "Waiting for response..." : "Type a message"}
+              placeholder="Type a message"
               className="min-h-[24px] max-h-[160px] w-full resize-none border-0 bg-transparent p-0 pl-3 focus-visible:ring-0 text-base text-black placeholder:text-gray-500 outline-none"
               disabled={isStreaming}
             />

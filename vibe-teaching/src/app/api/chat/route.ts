@@ -5,6 +5,7 @@ import { Scene } from "@/types/remotion-types";
 import { convertJsonToRemotionTypes } from "@/lib/json-parser";
 import { v4 as uuidv4 } from "uuid";
 import xml2js from "xml2js";
+import { Message } from "@/hooks/use-chat";
 
 const groq = new Groq({
 	apiKey: process.env.GROQ_API_KEY!,
@@ -36,18 +37,15 @@ function extractXmlContent(text: string): string | null {
 	return null;
 }
 
-function convertXML(inp: any) {
+function convertXML(inp: string): Record<string, any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 	const parser = new xml2js.Parser({ explicitArray: false });
 
 	// Example usage:
-	let res = {};
+	let res: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
 	parser.parseString(inp, (err, result) => {
 		if (err) {
-			console.log(err.message);
-			console.log("ERRROR!!!!!!");
 			res = {};
 		} else {
-			console.log("RESULT: ", JSON.stringify(result, null, 4));
 			res = result;
 		}
 	});
@@ -66,6 +64,12 @@ function convertXmlToJson(xmlContent: string | null): Scene[] | null {
 	try {
 		// Convert XML to intermediate JSON format
 		const intermediateJson = convertXML(xmlContent);
+
+		// Ensure scene is an array before converting to Remotion types
+		if (intermediateJson?.content?.scene && !Array.isArray(intermediateJson.content.scene)) {
+			// If scene is not an array, wrap it in an array
+			intermediateJson.content.scene = [intermediateJson.content.scene];
+		}
 
 		// Convert intermediate JSON to Remotion types
 		const remotionJson = convertJsonToRemotionTypes(intermediateJson);
@@ -102,15 +106,60 @@ export async function POST(request: Request) {
 		// Parse the request body to get the user's input
 		const body = await request.json();
 		const userInput = body.prompt || "";
+		const messagesHistory: Message[] = body.messages || [];
+
+		// Build the messages array for Groq from the message history
+		const groqMessages: Array<{role: 'system' | 'user' | 'assistant', content: string}> = [
+			{ role: "system", content: systemPrompt }
+		];
+
+		// Add only the most recent messages
+		if (messagesHistory.length > 0) {
+			// Find latest user message (which should be the last non-empty one)
+			const latestUserMessage = messagesHistory
+				.filter(msg => msg.type === "user" && msg.content.trim())
+				.pop();
+			
+			// Find latest assistant message if it exists (coming before the latest user message)
+			let latestAssistantMessage = null;
+			if (latestUserMessage) {
+				const userMessageIndex = messagesHistory.findIndex(msg => msg.id === latestUserMessage.id);
+				// Look for the most recent assistant message before this user message
+				for (let i = userMessageIndex - 1; i >= 0; i--) {
+					if (messagesHistory[i].type === "system" && messagesHistory[i].content.trim()) {
+						latestAssistantMessage = messagesHistory[i];
+						break;
+					}
+				}
+			}
+			
+			// Add the assistant message first if it exists
+			if (latestAssistantMessage) {
+				groqMessages.push({
+					role: "assistant",
+					content: latestAssistantMessage.content
+				});
+			}
+			
+			// Then add the user message
+			if (latestUserMessage) {
+				groqMessages.push({
+					role: "user",
+					content: userPrompt + latestUserMessage.content
+				});
+			}
+		} else {
+			// Fallback to just the current prompt if no history
+			groqMessages.push({ role: "user", content: userPrompt + userInput });
+		}
 
 		// Generate content from Groq
+		console.log("INPUT: ", groqMessages.slice(1));
 		const chatCompletion = await groq.chat.completions.create({
-			messages: [
-				{ role: "system", content: systemPrompt },
-				{ role: "user", content: userPrompt + userInput },
-			],
+			messages: groqMessages,
 			model: "llama3-8b-8192",
 		});
+		
 
 		// Extract the response content
 		const responseContent = chatCompletion.choices[0]?.message?.content || "";
@@ -118,12 +167,10 @@ export async function POST(request: Request) {
 		// Extract XML content if present
 		const xmlContent = extractXmlContent(responseContent);
 
-		console.log("XML: ", xmlContent);
-
 		// Convert XML to JSON if XML content is found
 		const jsonContent = convertXmlToJson(xmlContent);
 
-		console.log("JSON: ", jsonContent);
+		// console.log("JSON: ", jsonContent);
 		// Return the full response, extracted XML, and the converted JSON
 		return NextResponse.json(
 			{
