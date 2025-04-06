@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
+    "@remotion/animation-utils": "^4.0.286",
     "@remotion/cli": "4.0.286",
     "@remotion/player": "^4.0.286",
     "class-variance-authority": "^0.7.1",

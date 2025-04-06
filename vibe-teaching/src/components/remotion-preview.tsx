@@ -4,6 +4,7 @@ import { AbsoluteFill, Series, useCurrentFrame, interpolate } from "remotion";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useRef } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
+import { animationProfiles } from "@/types/constants";
 
 interface RemotionPreviewProps {
   scenes: Scene[];
@@ -148,34 +149,6 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
     }
   }, [frame, currentSceneIndex, relativeFrame, setCurrentFrame, debug]);
 
-  // Define animation profiles from least to most explosive
-  const animationProfiles = [
-    {
-      name: "calm",
-      scale: [0.95, 1.02, 1, 1.01, 1],
-      translateY: [5, -2, 0, -1, 0],
-      rotate: [0.2, 0, 0.1, 0, 0],
-    },
-    {
-      name: "moderate",
-      scale: [0.9, 1.07, 1.02, 1.05, 1],
-      translateY: [10, -5, 0, -3, 0],
-      rotate: [0.5, -0.2, 0, 0.2, 0],
-    },
-    {
-      name: "energetic",
-      scale: [0.85, 1.12, 1.03, 1.07, 1],
-      translateY: [20, -10, 2, -5, 0],
-      rotate: [1, -0.5, 0, 0.4, 0],
-    },
-    {
-      name: "explosive",
-      scale: [0.8, 1.18, 0.95, 1.12, 1],
-      translateY: [30, -15, 5, -10, 0],
-      rotate: [2, -1, 0.5, -0.5, 0],
-    },
-  ];
-
   // Map animations to scene positions
   const getAnimationProfile = (sceneIndex: number, totalScenes: number) => {
     // First 25% of scenes - start with calm, growing to moderate
@@ -210,6 +183,16 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
         // Get appropriate animation profile based on scene position
         const profile = getAnimationProfile(sceneIndex, scenes.length);
 
+		const sceneStyles = profile.styles(sceneProgress);
+
+        // Add the blur effect
+        const blurEffect = { 
+          filter: `blur(${interpolate(localRelativeFrame, [0, 10], [5, 0], { 
+            extrapolateLeft: "clamp", 
+            extrapolateRight: "clamp" 
+          })}px)` 
+        };
+
         return (
           <Series.Sequence
             key={scene.id || `scene-${scene.desc}-${sceneIndex}`}
@@ -221,32 +204,8 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                 scene.class
               )}
               style={{
-                opacity: interpolate(localRelativeFrame, [0, 12], [0, 1], {
-                  extrapolateLeft: "clamp",
-                  extrapolateRight: "clamp",
-                }),
-                filter: `blur(${interpolate(
-                  localRelativeFrame,
-                  [0, 10],
-                  [5, 0],
-                  { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-                )}px)`,
-                transform: `
-									scale(${interpolate(sceneProgress, [0, 0.1, 0.3, 0.7, 1], profile.scale, {
-                    extrapolateLeft: "clamp",
-                    extrapolateRight: "clamp",
-                  })})
-									translateY(${interpolate(
-                    sceneProgress,
-                    [0, 0.15, 0.3, 0.7, 1],
-                    profile.translateY,
-                    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-                  )}px)
-									rotate(${interpolate(sceneProgress, [0, 0.15, 0.3, 0.7, 1], profile.rotate, {
-                    extrapolateLeft: "clamp",
-                    extrapolateRight: "clamp",
-                  })}deg)
-								`,
+                ...sceneStyles,
+                ...blurEffect
               }}
             >
               {/* Visual debug overlay */}
@@ -296,7 +255,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h2
                           key={item.id || `subtitle-${itemIndex}`}
                           className={cn(
-                            "text-7xl font-semibold my-4 text-center",
+                            "text-6xl font-semibold my-4 text-center",
                             item.class
                           )}
                         >
@@ -314,7 +273,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h3
                           key={item.id || `heading-${itemIndex}`}
                           className={cn(
-                            "text-8xl font-medium my-6 text-center",
+                            "text-7xl font-medium my-6 text-center",
                             item.class
                           )}
                         >
@@ -332,7 +291,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <p
                           key={item.id || `paragraph-${itemIndex}`}
                           className={cn(
-                            "text-6xl my-4 text-center max-w-4xl",
+                            "text-4xl my-4 text-center max-w-4xl",
                             item.class
                           )}
                         >
