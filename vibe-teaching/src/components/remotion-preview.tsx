@@ -43,7 +43,7 @@ export function RemotionPreview({
   useEffect(() => {
     if (playerRef.current && selectedSceneId) {
       if (debug) {
-        console.log("Seeking to frame:", startFrame);
+        console.log("Seeking to frame:", startFrame + 30);
       }
 
       // Pause first to make sure the seeking works correctly
@@ -52,9 +52,9 @@ export function RemotionPreview({
       // This is crucial - use setTimeout to ensure the seek happens after the player has initialized
       setTimeout(() => {
         if (playerRef.current) {
-          playerRef.current.seekTo(startFrame);
-          setCurrentFrame(startFrame);
-          setGlobalCurrentFrame(startFrame);
+          playerRef.current.seekTo(startFrame + 30);
+          setCurrentFrame(startFrame + 30);
+          setGlobalCurrentFrame(startFrame + 30);
         }
       }, 50);
     }
