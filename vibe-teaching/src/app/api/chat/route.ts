@@ -185,7 +185,8 @@ export async function POST(request: Request) {
 		console.log("INPUT: ", groqMessages.slice(1));
 		const chatCompletion = await groq.chat.completions.create({
 			messages: groqMessages,
-			model: "llama-3.3-70b-versatile",
+			// model: "llama-3.3-70b-versatile",
+			model: "deepseek-r1-distill-llama-70b",
 		});
 		
 
