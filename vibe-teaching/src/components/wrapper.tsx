@@ -42,24 +42,8 @@ const SuggestionButton = ({
   </motion.button>
 );
 
-// Welcome screen component for empty state - enhanced with suggestions
-const WelcomeScreen = ({ onSuggestionClick }) => {
-  // Animation variants for staggered animation
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
-
+// Welcome screen component for empty state - simplified now that suggestions are in ChatInterface
+const WelcomeScreen = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full h-full text-center px-6 py-12 bg-gradient-to-br from-indigo-50 to-purple-50">
       <div className="max-w-2xl">
@@ -94,67 +78,6 @@ const WelcomeScreen = ({ onSuggestionClick }) => {
           Start by describing the lesson you want to create. Our AI will generate
           video lessons based on your conversation.
         </motion.p>
-        
-        {/* Learning suggestion section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="mb-6"
-        >
-          <h3 className="text-indigo-700 font-semibold mb-3 flex items-center justify-center">
-            <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
-            <span>Let's Start Learning</span>
-          </h3>
-          
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto"
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-          >
-            <motion.div variants={itemVariants}>
-              <SuggestionButton 
-                icon={Stars} 
-                title="Explain how the solar system works" 
-                onClick={() => onSuggestionClick("Explain how the solar system works for a 5th grade science class. Make it fun and engaging!")}
-              />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <SuggestionButton 
-                icon={Sparkles} 
-                title="Create a math lesson about fractions" 
-                onClick={() => onSuggestionClick("Create a video lesson about adding fractions with different denominators for 4th graders.")}
-              />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <SuggestionButton 
-                icon={BookOpen} 
-                title="Teach about photosynthesis" 
-                onClick={() => onSuggestionClick("Create a video explaining photosynthesis with simple visuals for middle school students.")}
-              />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <SuggestionButton 
-                icon={Rocket} 
-                title="History of space exploration" 
-                onClick={() => onSuggestionClick("Make a video about the history of space exploration highlighting key missions and discoveries.")}
-              />
-            </motion.div>
-          </motion.div>
-        </motion.div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-sm text-gray-500"
-        >
-          Or type your own message below to begin
-        </motion.div>
       </div>
     </div>
   );
@@ -196,23 +119,6 @@ export default function Wrapper() {
 
   const handleTimelineItemSelect = (item: TimelineItem) => {
     setSelectedTimelineItem(item);
-  };
-
-  // Function to handle clicks on learning suggestions
-  const handleSuggestionClick = (suggestion: string) => {
-    // Directly set the welcome input value
-    const welcomeInput = document.getElementById('welcomeInput') as HTMLTextAreaElement;
-    if (welcomeInput) {
-      welcomeInput.value = suggestion;
-      welcomeInput.focus();
-      
-      // Simulate input event to trigger resize
-      const inputEvent = new Event('input', { bubbles: true });
-      welcomeInput.dispatchEvent(inputEvent);
-    }
-    
-    // Log for debugging
-    console.log("Suggestion clicked, populating welcome input:", suggestion);
   };
 
   // Function to toggle view mode (with blurred background)
@@ -300,79 +206,77 @@ export default function Wrapper() {
           </motion.div>
         </>
       ) : (
-        // Welcome screen with just search input
+        // Welcome screen with integrated ChatInterface
         <div className="w-full flex flex-col h-full transition-all duration-500">
-          <div className="flex-1 min-h-0">
-            <WelcomeScreen onSuggestionClick={handleSuggestionClick} />
-          </div>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="px-4 pb-8 pt-2"
-          >
-            {/* Input bar only */}
-            <div className="max-w-2xl mx-auto">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const input = (e.target as HTMLFormElement).elements.namedItem('promptInput') as HTMLTextAreaElement;
-                  if (input.value.trim()) {
-                    // Create a user message
-                    const newMessage: Message = {
-                      id: `user-${Date.now()}`,
-                      type: "user",
-                      content: input.value.trim(),
-                    };
-                    
-                    // Update shared messages
-                    setSharedMessages([newMessage]);
-                    
-                    // Trigger content generation
-                    handleSendMessage(input.value.trim());
-                    
-                    // Clear input
-                    input.value = '';
-                  }
-                }}
-                className="relative w-full rounded-2xl border border-purple-200 bg-white shadow-md p-3"
-              >
-                <textarea
-                  id="welcomeInput"
-                  name="promptInput"
-                  className="min-h-[24px] max-h-[160px] w-full resize-none border-0 bg-transparent p-0 pl-3 focus-visible:ring-0 text-base text-black placeholder:text-purple-300 outline-none"
-                  placeholder="Ask me to create an educational video..."
-                  rows={1}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = 'auto';
-                    target.style.height = `${Math.min(target.scrollHeight, 160)}px`;
+          <div className="flex-1 min-h-0 relative">
+            {/* Welcome illustration and header that remains visible */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center w-full py-8 px-6 bg-gradient-to-br from-indigo-50 to-purple-50"
+            >
+              <div className="max-w-2xl">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="mb-6 relative h-60 w-full"
+                >
+                  <Image 
+                    src="/welcome-illustration.svg" 
+                    alt="Welcome to Vibe Teaching"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </motion.div>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="text-3xl font-bold mb-4 text-center text-indigo-700 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600"
+                >
+                  Welcome to Vibe Teaching
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="text-gray-600 mb-6 text-lg max-w-lg mx-auto text-center"
+                >
+                  Start by describing the lesson you want to create. Our AI will generate
+                  video lessons based on your conversation.
+                </motion.p>
+              </div>
+            </motion.div>
+            
+            {/* Position the ChatInterface at the bottom of the welcome screen */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              className="px-4 pb-8 pt-0"
+            >
+              <div className="max-w-2xl mx-auto">
+                <ChatInterface
+                  onSendMessage={(message) => {
+                    handleSendMessage(message);
+                    // Don't add message to shared messages, that will be handled by the component
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      (e.target as HTMLTextAreaElement).form?.requestSubmit();
+                  onReceiveMessage={handleReceiveMessage}
+                  initialMessages={[]}
+                  onMessagesChange={(messages) => {
+                    handleMessageUpdate(messages);
+                    // If we get messages, also trigger content generation
+                    if (messages.length > 0) {
+                      setHasContent(true);
                     }
                   }}
-                ></textarea>
-
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="absolute bottom-3 right-3 h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white transition-all shadow-md flex items-center justify-center"
-                >
-                  <Button
-                    type="submit"
-                    size="icon"
-                    className="p-0"
-                  >
-                    <span className="sr-only">Send message</span>
-                    <ArrowUp className="h-5 w-5" />
-                  </Button>
-                </motion.div>
-              </form>
-            </div>
-          </motion.div>
+                  isFullWidth={true}
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       )}
     </div>

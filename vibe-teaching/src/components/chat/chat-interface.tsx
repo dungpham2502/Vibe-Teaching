@@ -134,6 +134,7 @@ export default function ChatInterface({
 
   const [inputValue, setInputValue] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true); // Control suggestion visibility
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -170,6 +171,11 @@ export default function ChatInterface({
   // Notify parent component of message changes
   useEffect(() => {
     onMessagesChange?.(messages);
+    
+    // Hide suggestions when we have messages
+    if (messages.length > 0) {
+      setShowSuggestions(false);
+    }
   }, [messages, onMessagesChange]);
 
   // Show confetti when a <content>...</content> block is in the last message
@@ -207,6 +213,7 @@ export default function ChatInterface({
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
       }
+      console.log("Sending message:", message);
       await sendMessage(message);
     }
   };
@@ -216,6 +223,57 @@ export default function ChatInterface({
       e.preventDefault();
       handleSubmit(e);
     }
+  };
+  
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputValue(suggestion);
+    
+    // Auto-resize textarea
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
+      textareaRef.current.focus();
+    }
+  };
+
+  // Enhanced suggestion button component (moved from wrapper)
+  const SuggestionButton = ({
+    icon: Icon,
+    title,
+    onClick,
+  }: {
+    icon: React.ElementType;
+    title: string;
+    onClick: () => void;
+  }) => (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="flex items-center justify-center gap-2 bg-white rounded-xl px-4 py-3 text-indigo-700 border border-indigo-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all w-full text-left"
+      onClick={onClick}
+    >
+      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0">
+        <Icon className="w-5 h-5 text-indigo-600" />
+      </div>
+      <span className="font-medium">{title}</span>
+    </motion.button>
+  );
+
+  // Animation variants for staggered animation
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
   };
 
   return (
@@ -240,15 +298,97 @@ export default function ChatInterface({
         )}
       >
         <div className="space-y-6 max-w-4xl mx-auto">
-          {messages.length > 0 && (
+          {messages.length > 0 ? (
             <AnimatePresence>
               {messages.map((message) => (
                 <ChatBubble key={message.id} type={message.type}>
                   <FormattedMessage content={message.content} />
                 </ChatBubble>
               ))}
+              
+              {/* Add thinking indicator when streaming */}
+              {isStreaming && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="flex items-start"
+                >
+                  <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-none bg-gradient-to-r from-white to-blue-50 border border-blue-100 text-gray-900">
+                    <div className="flex space-x-2">
+                      <motion.div 
+                        animate={{ scale: [0.8, 1.2, 0.8] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        className="w-2 h-2 rounded-full bg-indigo-400" 
+                      />
+                      <motion.div 
+                        animate={{ scale: [0.8, 1.2, 0.8] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                        className="w-2 h-2 rounded-full bg-indigo-500" 
+                      />
+                      <motion.div 
+                        animate={{ scale: [0.8, 1.2, 0.8] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                        className="w-2 h-2 rounded-full bg-indigo-600" 
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
-          )}
+          ) : isFullWidth && showSuggestions ? (
+            // Show suggestions in the chat area when in full width mode and no messages yet
+            <div className="mt-8">
+              <motion.h3 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-indigo-700 font-semibold mb-3 flex items-center justify-center"
+              >
+                <Lightbulb className="h-5 w-5 mr-2 text-yellow-500" />
+                <span>Let's Start Learning</span>
+              </motion.h3>
+              
+              <motion.div 
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <motion.div variants={itemVariants}>
+                  <SuggestionButton 
+                    icon={Stars} 
+                    title="Explain how the solar system works" 
+                    onClick={() => handleSuggestionClick("Explain how the solar system works for a 5th grade science class. Make it fun and engaging!")}
+                  />
+                </motion.div>
+                
+                <motion.div variants={itemVariants}>
+                  <SuggestionButton 
+                    icon={Sparkles} 
+                    title="Create a math lesson about fractions" 
+                    onClick={() => handleSuggestionClick("Create a video lesson about adding fractions with different denominators for 4th graders.")}
+                  />
+                </motion.div>
+                
+                <motion.div variants={itemVariants}>
+                  <SuggestionButton 
+                    icon={BookOpen} 
+                    title="Teach about photosynthesis" 
+                    onClick={() => handleSuggestionClick("Create a video explaining photosynthesis with simple visuals for middle school students.")}
+                  />
+                </motion.div>
+                
+                <motion.div variants={itemVariants}>
+                  <SuggestionButton 
+                    icon={Rocket} 
+                    title="History of space exploration" 
+                    onClick={() => handleSuggestionClick("Make a video about the history of space exploration highlighting key missions and discoveries.")}
+                  />
+                </motion.div>
+              </motion.div>
+            </div>
+          ) : null}
           <div ref={messagesEndRef} />
         </div>
       </div>
