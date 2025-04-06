@@ -185,12 +185,14 @@ export async function POST(request: Request) {
 		console.log("INPUT: ", groqMessages.slice(1));
 		const chatCompletion = await groq.chat.completions.create({
 			messages: groqMessages,
-			model: "llama3-8b-8192",
+			model: "llama-3.3-70b-versatile",
 		});
 		
 
 		// Extract the response content
 		const responseContent = chatCompletion.choices[0]?.message?.content || "";
+
+        console.log(responseContent)
 
 		// Extract XML content if present
 		const xmlContent = extractXmlContent(responseContent);

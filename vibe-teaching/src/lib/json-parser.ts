@@ -1,4 +1,5 @@
 import {
+    Div,
 	Heading,
 	Image,
 	Paragraph,
@@ -21,21 +22,22 @@ interface SceneElement {
 }
 
 interface JsonContent {
-	content?: {
-		scene?: Array<{
-			$: {
-				durationInFrames?: string;
-				desc?: string;
-				class?: string;
-				[key: string]: string | undefined;
-			};
-			title?: SceneElement;
-			subtitle?: SceneElement;
-			heading?: SceneElement;
-			paragraph?: SceneElement;
-			image?: SceneElement;
-		}>;
-	};
+    content?: {
+        scene?: Array<{
+            $: {
+                durationInFrames?: string;
+                desc?: string;
+                class?: string;
+                [key: string]: string | undefined;
+            };
+            title?: SceneElement | SceneElement[];
+            subtitle?: SceneElement | SceneElement[];
+            heading?: SceneElement | SceneElement[];
+            paragraph?: SceneElement | SceneElement[];
+            image?: SceneElement | SceneElement[];
+            div?: SceneElement | SceneElement[];
+        }>;
+    };
 }
 
 
@@ -103,61 +105,16 @@ export async function convertJsonToRemotionTypes(jsonData: JsonContent): Promise
 	const scenes: Scene[] = [];
 
 	for (const sceneObj of jsonData.content.scene) {
-		const children: RemotionObject[] = [];
-		if (sceneObj.title && sceneObj.title.$ && sceneObj.title._) {
-			children.push({
-				type: "title",
-				class: sceneObj.title.$ ? sceneObj.title.$.class || "" : "",
-				durationInFrames: parseInt(sceneObj.title.$?.durationInFrames || "150", 10),
-				text: sceneObj.title._,
-			} as Title);
-		}
-		if (sceneObj.subtitle && sceneObj.subtitle.$ && sceneObj.subtitle._) {
-			children.push({
-				type: "subtitle",
-				class: sceneObj.subtitle.$ ? sceneObj.subtitle.$.class || "" : "",
-				durationInFrames: parseInt(sceneObj.subtitle.$?.durationInFrames || "150", 10),
-				text: sceneObj.subtitle._,
-			} as SubTitle);
-		}
-		if (sceneObj.heading && sceneObj.heading.$ && sceneObj.heading._) {
-			children.push({
-				type: "heading",
-				class: sceneObj.heading.$ ? sceneObj.heading.$.class || "" : "",
-				durationInFrames: parseInt(sceneObj.heading.$?.durationInFrames || "150", 10),
-				text: sceneObj.heading._,
-			} as Heading);
-		}
-		if (sceneObj.paragraph && sceneObj.paragraph._ !== undefined) {
-			children.push({
-				type: "paragraph",
-				class: sceneObj.paragraph.$ ? sceneObj.paragraph.$.class || "" : "",
-				durationInFrames: parseInt(sceneObj.paragraph.$?.durationInFrames || "150", 10),
-				text: sceneObj.paragraph._,
-			} as Paragraph);
-		}
-		if (sceneObj.image && sceneObj.image.$ !== undefined) {
-			// Get the original src from the $ property (attributes) instead of _ (content)
-			const originalSrc = sceneObj.image.$.src || "";
-			
-			// Process the image with Pexels API if it matches the pattern
-			const processedSrc = await processImageWithPexels(originalSrc);
-			
-			children.push({
-				type: "image",
-				class: sceneObj.image.$ ? sceneObj.image.$.class || "" : "",
-				durationInFrames: parseInt(sceneObj.image.$?.durationInFrames || "150", 10),
-				src: processedSrc,
-			} as Image);
-		}
-		scenes.push({
-			type: "scene",
-			id: uuidv4(),
-			class: sceneObj.$ ? sceneObj.$.class || "" : "",
-			durationInFrames: parseInt(sceneObj.$?.durationInFrames || "150", 10),
-			desc: sceneObj.$?.desc || "",
-			children: children,
-		});
+        const children = await parseElements(sceneObj);
+
+        scenes.push({
+            type: "scene",
+            id: uuidv4(),
+            class: sceneObj.$ ? sceneObj.$.class || "" : "",
+            durationInFrames: parseInt(sceneObj.$?.durationInFrames || "150", 10),
+            desc: sceneObj.$?.desc || "",
+            children: children,
+        });
 	}
 	
 	if (scenes.length === 0) {
@@ -167,4 +124,175 @@ export async function convertJsonToRemotionTypes(jsonData: JsonContent): Promise
 	}
 	
 	return scenes;
+}
+
+
+async function parseElements(elementObj: {
+    $: {
+        durationInFrames?: string;
+        desc?: string;
+        class?: string;
+        [key: string]: string | undefined;
+    };
+    title?: SceneElement | SceneElement[];
+    subtitle?: SceneElement | SceneElement[];
+    heading?: SceneElement | SceneElement[];
+    paragraph?: SceneElement | SceneElement[];
+    image?: SceneElement | SceneElement[];
+    div?: SceneElement | SceneElement[];
+}): Promise<RemotionObject[]> {
+    const children: RemotionObject[] = [];
+
+    // Handle title elements
+    if (elementObj.title) {
+        if (Array.isArray(elementObj.title)) {
+            for (const title of elementObj.title) {
+                if (title.$ && title._) {
+                    children.push({
+                        type: "title",
+                        class: title.$.class || "",
+                        durationInFrames: parseInt(title.$.durationInFrames || "150", 10),
+                        text: title._.trim(),
+                    } as Title);
+                }
+            }
+        } else if (elementObj.title.$ && elementObj.title._) {
+            children.push({
+                type: "title",
+                class: elementObj.title.$.class || "",
+                durationInFrames: parseInt(elementObj.title.$.durationInFrames || "150", 10),
+                text: elementObj.title._.trim(),
+            } as Title);
+        }
+    }
+    
+    // Handle subtitle elements
+    if (elementObj.subtitle) {
+        if (Array.isArray(elementObj.subtitle)) {
+            for (const subtitle of elementObj.subtitle) {
+                if (subtitle.$ && subtitle._) {
+                    children.push({
+                        type: "subtitle",
+                        class: subtitle.$.class || "",
+                        durationInFrames: parseInt(subtitle.$.durationInFrames || "150", 10),
+                        text: subtitle._.trim(),
+                    } as SubTitle);
+                }
+            }
+        } else if (elementObj.subtitle.$ && elementObj.subtitle._) {
+            children.push({
+                type: "subtitle",
+                class: elementObj.subtitle.$.class || "",
+                durationInFrames: parseInt(elementObj.subtitle.$.durationInFrames || "150", 10),
+                text: elementObj.subtitle._.trim(),
+            } as SubTitle);
+        }
+    }
+    
+    // Handle heading elements
+    if (elementObj.heading) {
+        if (Array.isArray(elementObj.heading)) {
+            for (const heading of elementObj.heading) {
+                if (heading.$ && heading._) {
+                    children.push({
+                        type: "heading",
+                        class: heading.$.class || "",
+                        durationInFrames: parseInt(heading.$.durationInFrames || "150", 10),
+                        text: heading._.trim(),
+                    } as Heading);
+                }
+            }
+        } else if (elementObj.heading.$ && elementObj.heading._) {
+            children.push({
+                type: "heading",
+                class: elementObj.heading.$.class || "",
+                durationInFrames: parseInt(elementObj.heading.$.durationInFrames || "150", 10),
+                text: elementObj.heading._.trim(),
+            } as Heading);
+        }
+    }
+    
+    // Handle paragraph elements
+    if (elementObj.paragraph) {
+        if (Array.isArray(elementObj.paragraph)) {
+            for (const paragraph of elementObj.paragraph) {
+                if (paragraph._ !== undefined) {
+                    children.push({
+                        type: "paragraph",
+                        class: paragraph.$ ? paragraph.$.class || "" : "",
+                        durationInFrames: parseInt(paragraph.$.durationInFrames || "150", 10),
+                        text: paragraph._.trim(),
+                    } as Paragraph);
+                }
+            }
+        } else if (elementObj.paragraph._ !== undefined) {
+            children.push({
+                type: "paragraph",
+                class: elementObj.paragraph.$ ? elementObj.paragraph.$.class || "" : "",
+                durationInFrames: parseInt(elementObj.paragraph.$.durationInFrames || "150", 10),
+                text: elementObj.paragraph._.trim(),
+            } as Paragraph);
+        }
+    }
+    
+    // Handle image elements
+    if (elementObj.image) {
+        if (Array.isArray(elementObj.image)) {
+            for (const image of elementObj.image) {
+                if (image.$) {
+                    const originalSrc = image.$.src || "";
+                
+                // Process the image with Pexels API if it matches the pattern
+                const processedSrc = await processImageWithPexels(originalSrc);
+                
+                children.push({
+                    type: "image",
+                    class: image.$ ? image.$.class || "" : "",
+                    durationInFrames: parseInt(image.$?.durationInFrames || "150", 10),
+                    src: processedSrc,
+                } as Image);
+                }
+            }
+        } else if (elementObj.image.$) {
+            if (elementObj.image && elementObj.image.$ !== undefined) {
+                // Get the original src from the $ property (attributes) instead of _ (content)
+                const originalSrc = elementObj.image.$.src || "";
+                
+                // Process the image with Pexels API if it matches the pattern
+                const processedSrc = await processImageWithPexels(originalSrc);
+                
+                children.push({
+                    type: "image",
+                    class: elementObj.image.$ ? elementObj.image.$.class || "" : "",
+                    durationInFrames: parseInt(elementObj.image.$?.durationInFrames || "150", 10),
+                    src: processedSrc,
+                } as Image);
+            }
+        }
+    }
+
+    // Handle div elements which can have nested children
+    if (elementObj.div) {
+        if (Array.isArray(elementObj.div)) {
+            for (const divObj of elementObj.div) {
+                const divChildren = await parseElements(divObj);
+                children.push({
+                    type: "div",
+                    id: uuidv4(),
+                    class: divObj.$ ? divObj.$.class || "" : "",
+                    children: divChildren,
+                } as Div);
+            }
+        } else {
+            const divChildren = await parseElements(elementObj.div);
+            children.push({
+                type: "div",
+                id: uuidv4(),
+                class: elementObj.div.$ ? elementObj.div.$.class || "" : "",
+                children: divChildren,
+            } as Div);
+        }
+    }
+
+    return children;
 }

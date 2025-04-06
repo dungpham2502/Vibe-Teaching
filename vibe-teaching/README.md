@@ -1,69 +1,95 @@
 # Vibe Teaching
 
-An interactive educational platform that creates dynamic video lessons using AI and Remotion.
+An AI-powered educational platform for creating engaging video lessons using Remotion.
 
 ## Overview
 
-Vibe Teaching is a Next.js application that allows educators to create engaging video lessons. The platform uses AI to help generate educational content and Remotion to render this content into video presentations.
+Vibe Teaching transforms how educators create content by combining the power of AI with dynamic video rendering. The platform enables teachers to generate educational videos through natural conversation, with real-time previews and an intuitive timeline interface.
 
 ## Features
 
-- **Interactive Lessons**: Create engaging educational content with dynamic animations
-- **Real-time Feedback**: See changes immediately as you edit your content
-- **AI Assistance**: Generate lesson content using AI technology
-- **Collaborative Tools**: Work together with other educators
+- **AI-Generated Content**: Create lesson content through conversation with an AI assistant
+- **Real-time Preview**: See your video content as it's being generated
+- **Interactive Timeline**: Organize and navigate through your video segments
+- **Focus Mode**: Immersive viewing experience with background blur
+- **Responsive Design**: Clean, modern UI that works across devices
+- **Dynamic Animations**: Engaging visual elements powered by Remotion
 
 ## Tech Stack
 
-- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
-- **Video Rendering**: Remotion
+- **Framework**: Next.js 15 with App Router and TypeScript
+- **UI**: React 19, Tailwind CSS 4, Radix UI components
 - **State Management**: Zustand
-- **Styling**: Tailwind CSS
-- **API**: Next.js API Routes
+- **Video Rendering**: Remotion 4
+- **AI Integration**: Groq API
+- **Styling**: Tailwind CSS with animations
 
 ## Getting Started
 
-First, install the dependencies:
+### Prerequisites
 
-```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
+- Node.js 18+ 
+- npm or another package manager
 
-Then, run the development server:
+### Installation
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/vibe-teaching.git
+   cd vibe-teaching
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+   Create a `.env.local` file with required API keys:
+   ```
+   GROQ_API_KEY=your_groq_api_key
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Start a Conversation**: Begin by describing the educational content you want to create
+2. **Generate Videos**: The AI will process your request and generate video content
+3. **Preview and Edit**: View the generated content in real-time and make adjustments
+4. **Navigate Timeline**: Use the timeline to switch between different segments
+5. **Focus Mode**: Toggle focus mode for distraction-free viewing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `src/app` - Next.js app router pages and layouts
+- `src/components` - UI components including chat interface, preview and timeline
+- `src/store` - Zustand state management
+- `src/lib` - Utility functions and shared libraries
+- `src/hooks` - Custom React hooks
+- `src/types` - TypeScript type definitions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Available Scripts
+
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Run production build
+- `npm run lint` - Run ESLint
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgments
+
+- [Remotion](https://www.remotion.dev/) for the video rendering framework
+- [Next.js](https://nextjs.org/) for the React framework
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Groq](https://groq.com/) for AI capabilities
