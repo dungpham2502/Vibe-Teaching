@@ -1,10 +1,10 @@
-# Vibe Teaching
+# VibeSlide
 
 An AI-powered educational platform for creating engaging video lessons using Remotion.
 
 ## Overview
 
-Vibe Teaching transforms how educators create content by combining the power of AI with dynamic video rendering. The platform enables teachers to generate educational videos through natural conversation, with real-time previews and an intuitive timeline interface.
+VibeSlide transforms how educators create content by combining the power of AI with dynamic video rendering. The platform enables teachers to generate educational videos through natural conversation, with real-time previews and an intuitive timeline interface.
 
 ## Features
 
@@ -35,8 +35,8 @@ Vibe Teaching transforms how educators create content by combining the power of 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/vibe-teaching.git
-   cd vibe-teaching
+   git clone https://github.com/yourusername/vibeslide.git
+   cd vibeslide
    ```
 
 2. Install dependencies:

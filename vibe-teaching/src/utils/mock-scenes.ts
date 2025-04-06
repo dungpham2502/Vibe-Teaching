@@ -5,7 +5,7 @@
 // const mockTitle1: Title = {
 //   class: "intro-title animated-fade-in",
 //   type: "title",
-//   text: "Welcome to Vibe Teaching",
+//   text: "Welcome to VibeSlide",
 //   durationInFrames: 60
 // };
 
