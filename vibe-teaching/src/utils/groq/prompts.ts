@@ -39,7 +39,7 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
      Recommended styles:
      - Position: "absolute"
      - Width: "max-w-[1536px]" (80% of 1920px)
-     - Text size: "text-8xl md:text-9xl" (scaled for 1080p)
+     - Text size: "text-9xl md:text-9xl" (scaled for 1080p)
      - Font weight: "font-bold"
      - Text alignment: "text-center"
      - Text color: "text-[color]"
@@ -51,7 +51,7 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
    - class: string (Tailwind classes for subtitles)
      Recommended styles:
      - Width: "max-w-[1344px]" (70% of 1920px)
-     - Text size: "text-4xl md:text-5xl"
+     - Text size: "text-7xl md:text-5xl"
      - Text alignment: "text-center"
      - Font weight: "font-semibold"
      - Text color: "text-[color] text-opacity-90"
@@ -62,7 +62,7 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
    - class: string (Tailwind classes for section headings)
      Recommended styles:
      - Width: "max-w-[1536px]"
-     - Text size: "text-6xl md:text-7xl"
+     - Text size: "text-8xl md:text-7xl"
      - Text alignment: "text-center"
      - Font weight: "font-bold"
      - Text color: "text-[color]"
@@ -74,7 +74,7 @@ AVAILABLE TAGS AND THEIR STYLING GUIDELINES:
    - class: string (Tailwind classes for paragraphs)
      Recommended styles:
      - Width: "max-w-[1344px]" (70% of 1920px)
-     - Text size: "text-3xl md:text-4xl"
+     - Text size: "text-6xl md:text-4xl"
      - Line height: "leading-relaxed"
      - Text alignment: "text-center"
      - Text color: "text-[color] text-opacity-80"
@@ -123,6 +123,11 @@ LAYOUT GUIDELINES FOR 1920x1080:
 3. Safe Margins:
    - Horizontal: 192px each side (10% of 1920px)
    - Vertical: 108px top/bottom (10% of 1080px)
+
+4. Color Palette:
+    - Background: Light colors for text contrast or dark colors for light text.
+    - You MUST use add a background color to the scene or else it will be transparent.
+    - Text: Dark colors for light backgrounds or light colors for dark backgrounds
 
 Example Structure with 1080p Styling:
 \`\`\`xml

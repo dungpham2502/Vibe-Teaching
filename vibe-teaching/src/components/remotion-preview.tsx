@@ -296,7 +296,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h2
                           key={item.id || `subtitle-${itemIndex}`}
                           className={cn(
-                            "text-6xl font-semibold my-4 text-center",
+                            "text-7xl font-semibold my-4 text-center",
                             item.class
                           )}
                         >
@@ -314,7 +314,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <h3
                           key={item.id || `heading-${itemIndex}`}
                           className={cn(
-                            "text-7xl font-medium my-6 text-center",
+                            "text-8xl font-medium my-6 text-center",
                             item.class
                           )}
                         >
@@ -332,7 +332,7 @@ export function VideoComponent({ scenes }: { scenes: Scene[] }) {
                         <p
                           key={item.id || `paragraph-${itemIndex}`}
                           className={cn(
-                            "text-4xl my-4 text-center max-w-4xl",
+                            "text-6xl my-4 text-center max-w-4xl",
                             item.class
                           )}
                         >
