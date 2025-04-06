@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
 // Component to format message content, replacing XML with video icon
 const FormattedMessage = ({ content }: { content: string }) => {
   // Detect if content contains XML content patterns
+  
   const hasXmlContent = content.includes("<content>") && content.includes("</content>");
   
   // Sanitize content by removing triple backticks and XML code blocks

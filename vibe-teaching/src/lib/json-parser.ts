@@ -38,9 +38,19 @@ interface JsonContent {
 }
 
 export function convertJsonToRemotionTypes(jsonData: JsonContent): Scene[] {
-	if (!jsonData?.content?.scene) {
-		console.error(jsonData);
-		throw new Error("Invalid JSON structure: Expected video.content array");
+	if (!jsonData) {
+		console.error("Invalid JSON: Input data is null or undefined");
+		return [];
+	}
+
+	if (!jsonData.content) {
+		console.error("Invalid JSON structure: Missing 'content' property", jsonData);
+		return [];
+	}
+
+	if (!jsonData.content.scene || !Array.isArray(jsonData.content.scene)) {
+		console.error("Invalid JSON structure: Expected 'content.scene' array", jsonData);
+		return [];
 	}
 
 	const scenes: Scene[] = [];
@@ -89,6 +99,12 @@ export function convertJsonToRemotionTypes(jsonData: JsonContent): Scene[] {
 			children: children,
 		});
 	}
-	console.log(scenes);
+	
+	if (scenes.length === 0) {
+		console.warn("No valid scenes found in the input JSON");
+	} else {
+		console.log(`Successfully parsed ${scenes.length} scenes`);
+	}
+	
 	return scenes;
 }

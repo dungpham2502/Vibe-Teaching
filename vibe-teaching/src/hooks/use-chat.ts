@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useScenesStore } from "@/store/useScenesStore";
 import { v4 } from "uuid";
 
@@ -22,6 +22,9 @@ export function useChat({
 	initialMessages = [],
 }: UseChatProps) {
 	const [messages, setMessages] = useState<Message[]>(initialMessages);
+	useEffect(() => {
+		console.log("Messages updated:", messages);
+	}, [messages]);
 	const [isStreaming, setIsStreaming] = useState(false);
 
 	const { setScenes, logState } = useScenesStore();
